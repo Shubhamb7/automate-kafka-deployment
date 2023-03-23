@@ -1,9 +1,9 @@
 # kafka3.1
 Deploying Kafka cluster with other Kafka Components on AWS using Terraform and Ansible.
 
-#### Components:
+## Components:
 
-Zookeeper cluster 
+Zookeeper 
 
 Apicurio Schema Registry
 
