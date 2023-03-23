@@ -21,3 +21,14 @@
       name: kafka.service
       state: started
       enabled: true
+- name: Start Cruise Control Services
+  hosts: cruise
+  remote_user: ubuntu
+  serial: 1
+  tasks:
+  - name: Start cruise control service
+    become: true
+    systemd:
+      name: cruise.service
+      state: started
+      enabled: true

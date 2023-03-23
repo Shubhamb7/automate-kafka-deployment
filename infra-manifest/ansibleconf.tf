@@ -15,6 +15,10 @@ ${ip}
 ${ip}
 %{ endfor ~}
  
+[cruise]
+%{ for ip in aws_instance.ec2cruise.*.private_ip ~}
+${ip}
+%{ endfor ~}
   EOT
   filename = "./ansible/hosts"
 }

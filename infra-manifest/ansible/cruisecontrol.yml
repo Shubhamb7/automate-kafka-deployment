@@ -3,8 +3,8 @@
   hosts: cruise
   remote_user: ubuntu
   vars:
-    kafka_ips: "{{hostvars[groups['kafka'][0]]['inventory_hostname']}}:9092,{{hostvars[groups['kafka'][1]]['inventory_hostname']}}:9092,{{hostvars[groups['kafka'][2]]['inventory_hostname']}}:9092"
-    zoo_ips: "{{hostvars[groups['zoo'][0]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][1]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][2]]['inventory_hostname']}}:2181"
+    kafka_ips: ""
+    zoo_ips: ""
   tasks:
   - name: Create sys log directory
     become: true

@@ -1,5 +1,5 @@
 ---
-- name: Packages required
+- name: Global Packages
   hosts: all
   remote_user: ubuntu
   tasks:
@@ -20,6 +20,14 @@
         name: openjdk-11-jdk
         state: present
         update_cache: yes
+- name: Kafka Packages
+  hosts: 
+    - kafka
+    - zoo
+    - mm
+    - connect
+  remote_user: ubuntu
+  tasks:
     - name: Download Kafka
       become: true
       get_url:

@@ -1,13 +1,13 @@
 profile    = "default"
 env        = "kafka"
-aws_region = "us-east-1"
+aws_region = "us-west-1"
 
-keypair = "terraform-test"
+keypair = "kafkacali"
 userssh = "ubuntu"
 key_path = "~/Downloads/"
 
 vpc_cidr_block = "10.25.0.0/16"
-subnet_availability_zones = ["us-east-1a"]
+subnet_availability_zones = ["us-west-1a"]
 public_subnet_cidr        = ["10.25.1.0/24"]
 private_subnet_cidr        = ["10.25.2.0/24"]
 
@@ -52,7 +52,7 @@ schema_configuration = {
 }
 
 cruise_configuration = {
-    "cruise_count" = 0,
+    "cruise_count" = 1,
     "instance_type" = "t2.medium",
     "disk" = 30,
     "subnet" = "public",

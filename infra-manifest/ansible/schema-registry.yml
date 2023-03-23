@@ -3,7 +3,7 @@
   hosts: schemareg
   remote_user: ubuntu
   vars:
-    kafka_ips: "{{hostvars[groups['kafka'][0]]['inventory_hostname']}}:9092,{{hostvars[groups['kafka'][1]]['inventory_hostname']}}:9092,{{hostvars[groups['kafka'][2]]['inventory_hostname']}}:9092"
+    kafka_ips: ""
   tasks:
   - name: Create sys log directory
     become: true
