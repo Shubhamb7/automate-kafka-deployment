@@ -7,8 +7,8 @@ Zookeeper
 
 Apicurio Schema Registry
 
-Mirror Maker
+Mirror Maker for data replication accross region
 
-Linked in Cruise Control
+Linked in Cruise Control or Provectus Kafka UI for monitoring
 
 
