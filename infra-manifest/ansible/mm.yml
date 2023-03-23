@@ -1,0 +1,40 @@
+---
+- name: Mirror Maker Configuration
+  hosts: mm
+  remote_user: ubuntu
+  tasks:
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "/opt/mm/systemlogs"
+      state: directory
+      mode: '0755'
+  - name: Remove existing kafka properties file
+    become: true
+    file:
+      path: /opt/kafka/config/connect-mirror-maker.properties
+      state: absent
+  - name: Upload local mm2 properties file to the server
+    become: true
+    copy:
+      src: /opt/ansible-files/connect-mirror-maker.properties
+      dest: /opt/kafka/config/
+      owner: root
+      group: root
+      mode: 0644
+  # - name: just force systemd to reread configs
+  #   become: true
+  #   systemd:
+  #     daemon_reload: yes
+  # - name: Enable mm2 service
+  #   become: true
+  #   systemd:
+  #     name: mm2.service
+  #     enabled: true
+  #     masked: no
+  # # - name: Start kafka service
+  #   become: true
+  #   systemd:
+  #     name: kafka.service
+  #     state: started
+  #     enabled: true

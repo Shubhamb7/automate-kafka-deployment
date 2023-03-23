@@ -1,0 +1,14 @@
+{
+  "brokerCapacities":[
+    {
+      "brokerId": "-1",
+      "capacity": {
+        "DISK": {"/opt/kafkadata/kafka-logs": " 40000"},
+        "CPU": "2",
+        "NW_IN": "5000",
+        "NW_OUT": "5000"
+      },
+      "doc": "The default capacity for a broker with multiple logDirs each on a separate heterogeneous disk."
+    }
+  ]
+}

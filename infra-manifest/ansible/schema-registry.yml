@@ -1,0 +1,51 @@
+---
+- name: Schema Registry configuration
+  hosts: schemareg
+  remote_user: ubuntu
+  vars:
+    kafka_ips: "{{hostvars[groups['kafka'][0]]['inventory_hostname']}}:9092,{{hostvars[groups['kafka'][1]]['inventory_hostname']}}:9092,{{hostvars[groups['kafka'][2]]['inventory_hostname']}}:9092"
+  tasks:
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "/opt/schemareg/systemlogs"
+      state: directory
+      mode: '0755'
+  - name: Download Apicurio
+    become: true
+    get_url:
+      url: https://github.com/Apicurio/apicurio-registry/releases/download/2.4.1.Final/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+      dest: /opt/schemareg/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+      mode: 0440
+  - name: Extract apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+    become: true
+    unarchive:
+      src: /opt/schemareg/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+      dest: /opt/schemareg/
+      remote_src: yes
+  - name: Generate schema-registry.service from template
+    become: true
+    template:
+      src: /opt/ansible-files/schema-registry.service.j2
+      dest: /etc/systemd/system/schema-registry.service
+  - name: just force systemd to reread configs
+    become: true
+    systemd:
+      daemon_reload: yes
+  - name: Enable schema registry service
+    become: true
+    systemd:
+      name: schema-registry.service
+      enabled: true
+      masked: no
+  - name: Remove tar file
+    become: true
+    file:
+      path: /opt/schemareg/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+      state: absent
+  # - name: Start kafka service
+  #   become: true
+  #   systemd:
+  #     name: kafka.service
+  #     state: started
+  #     enabled: true

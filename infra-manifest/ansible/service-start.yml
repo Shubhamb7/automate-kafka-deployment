@@ -1,0 +1,23 @@
+---
+- name: Start Zookeeper Services
+  hosts: zoo
+  remote_user: ubuntu
+  serial: 1
+  tasks:
+  - name: Start zookeeper service
+    become: true
+    systemd:
+      name: zookeeper.service
+      state: started
+      enabled: true
+- name: Start Kafka Services
+  hosts: kafka
+  remote_user: ubuntu
+  serial: 1
+  tasks:
+  - name: Start kafka service
+    become: true
+    systemd:
+      name: kafka.service
+      state: started
+      enabled: true

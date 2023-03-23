@@ -1,0 +1,67 @@
+---
+- name: Kafka configuration
+  hosts: kafka
+  remote_user: ubuntu
+  vars:
+    data_dir: /opt/kafkadata/kafka-logs
+    broker_id: "{{ansible_hostname | regex_replace('.*(.)$', '\\1')}}"
+    private_ip: "{{ hostvars[ inventory_hostname ]['ansible_default_ipv4']['address'] }}"
+    zoo_ips: "{{hostvars[groups['zoo'][0]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][1]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][2]]['inventory_hostname']}}:2181"
+  tasks:
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "/opt/kafkadata/systemlogs"
+      state: directory
+      mode: '0755'
+  - name: Get public ip for advertiser
+    command: curl --silent --fail http://ifconfig.me/ip
+    register: public_ip
+  - name: Remove existing kafka properties file
+    become: true
+    file:
+      path: /opt/kafka/config/server.properties
+      state: absent
+  - name: Generate server.properties from template
+    become: true
+    template:
+      src: /opt/ansible-files/server.properties.j2
+      dest: /opt/kafka/config/server.properties
+  - name: Upload local kafka service file to the servers
+    become: true
+    copy:
+      src: /opt/ansible-files/kafka.service
+      dest: /etc/systemd/system/
+      owner: root
+      group: root
+      mode: 0644
+  - name: Upload cruise control metrics exporter to the servers
+    become: true
+    copy:
+      src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
+      dest: /opt/kafka/libs/
+      owner: root
+      group: root
+      mode: 0644
+  - name: Download JMX exporter kafka metrics yml file
+    become: true
+    get_url:
+      url: https://raw.githubusercontent.com/prometheus/jmx_exporter/main/example_configs/kafka-0-8-2.yml
+      dest: /opt/monitoring/kafka-jmx.yml
+      mode: 0440
+  - name: just force systemd to reread configs
+    become: true
+    systemd:
+      daemon_reload: yes
+  - name: Enable kafka service
+    become: true
+    systemd:
+      name: kafka.service
+      enabled: true
+      masked: no
+  # - name: Start kafka service
+  #   become: true
+  #   systemd:
+  #     name: kafka.service
+  #     state: started
+  #     enabled: true

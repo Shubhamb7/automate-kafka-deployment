@@ -1,0 +1,223 @@
+data "aws_ami" "ubuntu" {
+    most_recent = true
+    filter {
+        name   = "name"
+        values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    }
+    filter {
+        name   = "virtualization-type"
+        values = ["hvm"]
+    }
+    filter {
+        name   = "architecture"
+        values = ["x86_64"]
+    }
+    owners = ["099720109477"] # Canonical official
+}
+
+resource "aws_instance" "ec2broker" {
+  count                  = var.kafka_configuration["kafka_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.kafka_configuration["instance_type"]
+  subnet_id              = var.kafka_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  depends_on             = [aws_instance.ec2zoo]
+  iam_instance_profile   = "SSMforEC2"
+
+  root_block_device {
+    volume_size           = var.kafka_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname kafka-broker${count.index}
+  EOF
+  tags = {
+    Name = "kafka${count.index}"
+  }
+}
+
+resource "aws_instance" "ec2zoo" {
+  count                  = var.zoo_configuration["zoo_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.zoo_configuration["instance_type"]
+  subnet_id              = var.zoo_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+
+  root_block_device {
+    volume_size           = var.zoo_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname zookeeper${count.index + 1}
+  EOF
+  tags = {
+    Name = "zookeeper${count.index + 1}"
+  }
+
+}
+
+resource "aws_instance" "ec2connect" {
+  count                  = var.connect_configuration["connect_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.connect_configuration["instance_type"]
+  subnet_id              = var.connect_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+  
+  root_block_device {
+    volume_size           = var.connect_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname kafka-connect${count.index + 1}
+  EOF
+
+  tags = {
+    Name = "kafka-connect${count.index + 1}"
+  }
+
+}
+
+resource "aws_instance" "ec2mm" {
+  count                  = var.mm_configuration["mm_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.mm_configuration["instance_type"]
+  subnet_id              = var.mm_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+
+  root_block_device {
+    volume_size           = var.mm_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname mm${count.index + 1}
+  EOF
+  tags = {
+    Name = "mirror-maker${count.index + 1}"
+  }
+
+}
+
+resource "aws_instance" "ec2schemareg" {
+  count                  = var.schema_configuration["schema_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.schema_configuration["instance_type"]
+  subnet_id              = var.schema_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+  
+  root_block_device {
+    volume_size           = var.schema_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname schema-registry${count.index + 1}
+  EOF
+
+  tags = {
+    Name = "schema-registry${count.index + 1}"
+  }
+
+}
+
+resource "aws_instance" "ec2cruise" {
+  count                  = var.cruise_configuration["cruise_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.cruise_configuration["instance_type"]
+  subnet_id              = var.cruise_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+  
+  root_block_device {
+    volume_size           = var.cruise_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname cruise-control${count.index + 1}
+  EOF
+
+  tags = {
+    Name = "cruise-control${count.index + 1}"
+  }
+
+}
+
+output "broker_private_ips" {
+  value = aws_instance.ec2broker.*.private_ip
+}
+
+output "broker_public_ips" {
+  value = aws_instance.ec2broker.*.public_ip
+}
+
+output "zoo_private_ips" {
+  value = aws_instance.ec2zoo.*.private_ip
+}
+
+output "zoo_public_ips" {
+  value = aws_instance.ec2zoo.*.public_ip
+}
+
+output "connect_public_ips" {
+  value = aws_instance.ec2connect.*.public_ip
+}
+
+output "connect_private_ips" {
+  value = aws_instance.ec2connect.*.private_ip
+}
+
+output "mm_public_ips" {
+  value = aws_instance.ec2mm.*.public_ip
+}
+
+output "mm_private_ips" {
+  value = aws_instance.ec2mm.*.private_ip
+}
+
+output "schema_public_ips" {
+  value = aws_instance.ec2schemareg.*.public_ip
+}
+
+output "schema_private_ips" {
+  value = aws_instance.ec2schemareg.*.private_ip
+}
+
+output "cruise_private_ips" {
+  value = aws_instance.ec2cruise.*.private_ip
+}
+
+output "cruise_public_ips" {
+  value = aws_instance.ec2cruise.*.public_ip
+}

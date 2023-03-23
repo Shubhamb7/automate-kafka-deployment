@@ -1,0 +1,65 @@
+---
+- name: Zookeeper configuration
+  hosts: zoo
+  remote_user: ubuntu
+  vars:
+    data_dir: /opt/zookeeperdata/
+    zookeeper1_ip:  "{{ hostvars[groups['zoo'][0]]['inventory_hostname'] }}"
+    zookeeper2_ip:  "{{ hostvars[groups['zoo'][1]]['inventory_hostname'] }}"
+    zookeeper3_ip:  "{{ hostvars[groups['zoo'][2]]['inventory_hostname'] }}"
+  tasks:
+  - name: Create data directory
+    become: true
+    file:
+      path: "{{ data_dir }}"
+      state: directory
+      mode: '0755'
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "{{ data_dir }}/systemlogs"
+      state: directory
+      mode: '0755'
+  - name: Remove existing zookeeper properties file
+    become: true
+    file:
+      path: /opt/kafka/config/zookeeper.properties
+      state: absent
+  - name: Generate zookeeper.properties from template
+    become: true
+    template:
+      src: /opt/ansible-files/zookeeper.properties.j2
+      dest: /opt/kafka/config/zookeeper.properties
+  - name: Upload local zookeeper service file to the servers
+    become: true
+    copy:
+      src: /opt/ansible-files/zookeeper.service
+      dest: /etc/systemd/system/
+      owner: root
+      group: root
+      mode: 0644
+  - name: Download JMX exporter zookeeper metrics yml file
+    become: true
+    get_url:
+      url: https://raw.githubusercontent.com/prometheus/jmx_exporter/main/example_configs/zookeeper.yaml
+      dest: /opt/monitoring/zookeeper.yaml
+      mode: 0440
+  - name: just force systemd to reread configs
+    become: true
+    systemd:
+      daemon_reload: yes
+  - name: Write myid to myid file
+    become: true
+    shell: "hostname | rev | cut -c1 > {{ data_dir }}myid"
+  - name: Enable zookeeper service
+    become: true
+    systemd:
+      name: zookeeper.service
+      enabled: true
+      masked: no
+  # - name: Start zookeeper service
+  #   become: true
+  #   systemd:
+  #     name: zookeeper.service
+  #     state: started
+  #     enabled: true
