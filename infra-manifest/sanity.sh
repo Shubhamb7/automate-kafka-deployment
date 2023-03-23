@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # This script makes changes to files
-# kafka.yml, zoo.yml, zookeeper.properties.j2, deployment.tf, ansibleconf.tf, cruisecontrol.yml, 
-# schema-registry.yml, service-start.yml, capacityJBOD.json
+# packages.yml, kafka.yml, zoo.yml, zookeeper.properties.j2, deployment.tf, ansibleconf.tf, 
+# cruisecontrol.yml, schema-registry.yml, service-start.yml, capacityJBOD.json
 #
 # Also it changes the file extensions for kafka components terraform files
 # ec2_connect.tf, ec2_mm.tf, ec2_cruise.tf, ec2_schema.tf
@@ -160,6 +160,88 @@ echo "  #   systemd:"                                                           
 echo "  #     name: zookeeper.service"                                                  >> ansible/zoo.yml
 echo "  #     state: started"                                                           >> ansible/zoo.yml
 echo "  #     enabled: true"                                                            >> ansible/zoo.yml
+
+
+#########################################################################################################
+#########                       PACKAGES YAML FILE                                           ############
+#########################################################################################################
+
+
+echo "---"                                                                                  > ansible/packages.yml
+echo "- name: Packages required"                                                            >> ansible/packages.yml
+echo "  hosts: all"                                                                         >> ansible/packages.yml
+echo "  remote_user: ubuntu"                                                                >> ansible/packages.yml
+echo "  tasks:"                                                                             >> ansible/packages.yml
+echo "    - name: Update apt repo and cache"                                                >> ansible/packages.yml
+echo "      become: true"                                                                   >> ansible/packages.yml
+echo "      apt:"                                                                           >> ansible/packages.yml
+echo "        update_cache: yes"                                                            >> ansible/packages.yml
+echo "        force_apt_get: yes"                                                           >> ansible/packages.yml
+echo "        cache_valid_time: 3600"                                                       >> ansible/packages.yml
+echo "    - name: Upgrade all packages"                                                     >> ansible/packages.yml
+echo "      become: true"                                                                   >> ansible/packages.yml
+echo "      apt:"                                                                           >> ansible/packages.yml
+echo "        upgrade: dist"                                                                >> ansible/packages.yml
+echo "        force_apt_get: yes"                                                           >> ansible/packages.yml
+echo "    - name: Install openjdk 11"                                                       >> ansible/packages.yml
+echo "      become: true"                                                                   >> ansible/packages.yml
+echo "      apt:"                                                                           >> ansible/packages.yml
+echo "        name: openjdk-11-jdk"                                                         >> ansible/packages.yml
+echo "        state: present"                                                               >> ansible/packages.yml
+echo "        update_cache: yes"                                                            >> ansible/packages.yml
+echo "    - name: Download Kafka"                                                           >> ansible/packages.yml
+echo "      become: true"                                                                   >> ansible/packages.yml
+echo "      get_url:"                                                                       >> ansible/packages.yml
+if [ $CRUISE == 0 ]
+then
+    echo "        url: https://archive.apache.org/dist/kafka/3.3.1/kafka_2.13-3.3.1.tgz"    >> ansible/packages.yml
+    echo "        dest: /opt/kafka_2.13-3.3.1.tgz"                                          >> ansible/packages.yml
+    echo "        mode: 0440"                                                               >> ansible/packages.yml
+    echo "    - name: Extract kafka_2.13-3.3.1.tgz"                                         >> ansible/packages.yml
+    echo "      become: true"                                                               >> ansible/packages.yml
+    echo "      unarchive:"                                                                 >> ansible/packages.yml
+    echo "        src: /opt/kafka_2.13-3.3.1.tgz"                                           >> ansible/packages.yml
+    echo "        dest: /opt/"                                                              >> ansible/packages.yml
+    echo "        remote_src: yes"                                                          >> ansible/packages.yml
+    echo "    - name: Rename kafka folder"                                                  >> ansible/packages.yml
+    echo "      become: true"                                                               >> ansible/packages.yml
+    echo "      command: \"mv /opt/kafka_2.13-3.3.1 /opt/kafka\""                           >> ansible/packages.yml
+    echo "    - name: Remove kafka tar"                                                     >> ansible/packages.yml
+    echo "      become: true"                                                               >> ansible/packages.yml
+    echo "      file:"                                                                      >> ansible/packages.yml
+    echo "        path: /opt/kafka_2.13-3.3.1.tgz"                                          >> ansible/packages.yml
+    echo "        state: absent"                                                            >> ansible/packages.yml
+else
+    echo "        url: https://downloads.apache.org/kafka/3.1.2/kafka_2.13-3.1.2.tgz"       >> ansible/packages.yml
+    echo "        dest: /opt/kafka_2.13-3.1.2.tgz"                                          >> ansible/packages.yml
+    echo "        mode: 0440"                                                               >> ansible/packages.yml
+    echo "    - name: Extract kafka_2.13-3.1.2.tgz"                                         >> ansible/packages.yml
+    echo "      become: true"                                                               >> ansible/packages.yml
+    echo "      unarchive:"                                                                 >> ansible/packages.yml
+    echo "        src: /opt/kafka_2.13-3.1.2.tgz"                                           >> ansible/packages.yml
+    echo "        dest: /opt/"                                                              >> ansible/packages.yml
+    echo "        remote_src: yes"                                                          >> ansible/packages.yml
+    echo "    - name: Rename kafka folder"                                                  >> ansible/packages.yml
+    echo "      become: true"                                                               >> ansible/packages.yml
+    echo "      command: \"mv /opt/kafka_2.13-3.1.2 /opt/kafka\""                           >> ansible/packages.yml
+    echo "    - name: Remove kafka tar"                                                     >> ansible/packages.yml
+    echo "      become: true"                                                               >> ansible/packages.yml
+    echo "      file:"                                                                      >> ansible/packages.yml
+    echo "        path: /opt/kafka_2.13-3.1.2.tgz"                                          >> ansible/packages.yml
+    echo "        state: absent"                                                            >> ansible/packages.yml
+fi
+echo "    - name: Create monitoring directory"                                              >> ansible/packages.yml
+echo "      become: true"                                                                   >> ansible/packages.yml
+echo "      file:"                                                                          >> ansible/packages.yml
+echo "        path: \"/opt/monitoring\""                                                    >> ansible/packages.yml
+echo "        state: directory"                                                             >> ansible/packages.yml
+echo "        mode: '0755'"                                                                 >> ansible/packages.yml
+echo "    - name: Download JMX exporter"                                                    >> ansible/packages.yml
+echo "      become: true"                                                                   >> ansible/packages.yml
+echo "      get_url:"                                                                       >> ansible/packages.yml
+echo "        url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.18.0/jmx_prometheus_javaagent-0.18.0.jar"    >> ansible/packages.yml
+echo "        dest: /opt/monitoring/jmx_prometheus_javaagent-0.18.0.jar"                    >> ansible/packages.yml
+echo "        mode: 0440"                                                                   >> ansible/packages.yml
 
 #########################################################################################################
 #########                   DEPLOYMENT TERRAFORM FILE                                           #########
