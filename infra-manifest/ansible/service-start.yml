@@ -21,6 +21,17 @@
       name: kafka.service
       state: started
       enabled: true
+- name: Start Schema Registry Services
+  hosts: schemareg
+  remote_user: ubuntu
+  serial: 1
+  tasks:
+  - name: Start schema registry service
+    become: true
+    systemd:
+      name: schema-registry.service
+      state: started
+      enabled: true
 - name: Start Cruise Control Services
   hosts: cruise
   remote_user: ubuntu

@@ -148,7 +148,7 @@ sudo hostnamectl set-hostname schema-registry${count.index + 1}
 }
 
 resource "aws_instance" "ec2cruise" {
-  count                  = var.cruise_configuration["cruise_count"]
+  count                  = var.cruise_configuration["cruise_deploy"] != "true" ? 0 : 1
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.cruise_configuration["instance_type"]
   subnet_id              = var.cruise_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
@@ -165,11 +165,38 @@ resource "aws_instance" "ec2cruise" {
 
   user_data = <<EOF
 #!/bin/bash
-sudo hostnamectl set-hostname cruise-control${count.index + 1}
+sudo hostnamectl set-hostname cruise-control
   EOF
 
   tags = {
-    Name = "cruise-control${count.index + 1}"
+    Name = "cruise-control"
+  }
+
+}
+
+resource "aws_instance" "ec2provectus" {
+  count                  = var.provectus_ui_configuration["provectus_deploy"] != "true" ? 0 : 1
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.provectus_ui_configuration["instance_type"]
+  subnet_id              = var.provectus_ui_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+  
+  root_block_device {
+    volume_size           = var.provectus_ui_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname kafka-ui
+  EOF
+
+  tags = {
+    Name = "kafka-ui"
   }
 
 }
@@ -220,4 +247,12 @@ output "cruise_private_ips" {
 
 output "cruise_public_ips" {
   value = aws_instance.ec2cruise.*.public_ip
+}
+
+output "provectus_private_ips" {
+  value = aws_instance.ec2provectus.*.private_ip
+}
+
+output "provectus_public_ips" {
+  value = aws_instance.ec2provectus.*.public_ip
 }

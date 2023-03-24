@@ -46,6 +46,10 @@ variable "cruise_configuration" {
   type = map(any)
 }
 
+variable "provectus_ui_configuration" {
+  type = map(any)
+}
+
 variable "keypair" {
   type = string
 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script makes changes to files
-# kafka.yml, zoo.yml, zookeeper.properties.j2, deployment.tf, ansibleconf.tf, cruisecontrol.yml,
+# kafka.yml, zoo.yml, zookeeper.properties.j2, deployment.tf, ansibleconf.tf, cruisecontrol.yml, packages.yml,
 # schema-registry.yml, service-start.yml, capacityJBOD.json
 #
 # Also it changes the file extensions for kafka components terraform files
@@ -12,7 +12,7 @@ KAFKA=$(cat dev.auto.tfvars | grep kafka_count | awk '{print substr($3, 1, lengt
 MM=$(cat dev.auto.tfvars | grep mm_count | awk '{print substr($3, 1, length($3)-1)}')
 CONN=$(cat dev.auto.tfvars | grep connect_count | awk '{print substr($3, 1, length($3)-1)}')
 SCHEMA=$(cat dev.auto.tfvars | grep schema_count | awk '{print substr($3, 1, length($3)-1)}')
-CRUISE=$(cat dev.auto.tfvars | grep cruise_count | awk '{print substr($3, 1, length($3)-1)}')
+CRUISE=$(cat dev.auto.tfvars | grep cruise_deploy | awk '{print substr($3, 2, length($3)-3)}')
 
 DISK=$(cat dev.auto.tfvars | grep disk | head -n 1 | awk -F= '{print substr($2,1,length($2)-1)}')
 
@@ -42,9 +42,35 @@ do
     fi
 done
 
-sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/cruisecontrol.yml
-sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/schema-registry.yml
-sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/cruisecontrol.yml
+if [ $CRUISE == "false" ]
+then
+    sed -i "38,45s/^/#/" ansible/kafka.yml
+    sed -i "141s/^/#/" ansible/server.properties.j2
+    sed -i "41s/^/#/" deployment.tf
+    sed -i "35,45s/^/#/" ansible/service-start.yml
+else
+    sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/cruisecontrol.yml
+    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/cruisecontrol.yml
+fi
+
+if [ $SCHEMA -gt 0 ]
+then
+    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/schema-registry.yml
+else
+    sed -i "39s/^/#/" deployment.tf
+    sed -i "24,34s/^/#/" ansible/service-start.yml
+fi
+
+if [ $CONN == 0 ]
+then
+    sed -i "28s/^/#/" ansible/packages.yml
+fi
+
+if [ $MM == 0 ]
+then
+    sed -i "27s/^/#/" ansible/packages.yml
+fi
+
 sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/kafka.yml
 
 #########################################################################################################
@@ -162,72 +188,6 @@ echo "  #     state: started"                                                   
 echo "  #     enabled: true"                                                            >> ansible/zoo.yml
 
 #########################################################################################################
-#########                   DEPLOYMENT TERRAFORM FILE                                           #########
-#########################################################################################################
-
-echo "resource \"aws_instance\" \"ansible\" {"                                                                > deployment.tf
-echo "  ami                    = data.aws_ami.ubuntu.id"                                                      >> deployment.tf
-echo "  instance_type          = \"t2.small\""                                                                >> deployment.tf
-echo "  subnet_id              = aws_subnet.public_subnet[0].id"                                              >> deployment.tf
-echo "  vpc_security_group_ids = [aws_security_group.sg.id]"                                                  >> deployment.tf
-echo "  key_name               = var.keypair"                                                                 >> deployment.tf
-echo "  depends_on             = [local_file.ansible_hosts, aws_instance.ec2broker, aws_instance.ec2zoo]"     >> deployment.tf
-echo "  iam_instance_profile   = \"SSMforEC2\""                                                               >> deployment.tf
-echo "  tags = {"                                                                                             >> deployment.tf
-echo "    Name = \"ansible-node\""                                                                            >> deployment.tf
-echo "  }"                                                                                                    >> deployment.tf
-echo "  provisioner \"file\" {"                                                                               >> deployment.tf
-echo "    source      = \"\${var.key_path}\${var.keypair}.pem\""                                                >> deployment.tf
-echo "    destination = \"\${var.keypair}.pem\""                                                               >> deployment.tf
-echo "  }"                                                                                                    >> deployment.tf
-echo "  connection {"                                                                                         >> deployment.tf
-echo "    type = \"ssh\""                                                                                     >> deployment.tf
-echo "    user = var.userssh"                                                                                 >> deployment.tf
-echo "    private_key = file(\"\${var.key_path}\\\\\${var.keypair}.pem\")"                                        >> deployment.tf
-echo "    host = self.public_dns"                                                                             >> deployment.tf
-echo "  }"                                                                                                    >> deployment.tf
-echo "  provisioner \"local-exec\" {"                                                                         >> deployment.tf
-echo "    command = \"scp -i \${var.key_path}\${var.keypair}.pem -o StrictHostKeyChecking=no ./ansible/* ubuntu@\${self.public_dns}:~/\"" >> deployment.tf
-echo "  }"                                                                                                    >> deployment.tf
-echo "  provisioner \"remote-exec\" {"                                                                        >> deployment.tf
-echo "    inline = ["                                                                                         >> deployment.tf
-echo "      \"sudo apt-get update && sudo apt-get upgrade -y\","                                              >> deployment.tf
-echo "      \"sudo apt-get install software-properties-common -y\","                                          >> deployment.tf
-echo "      \"sudo add-apt-repository --yes --update ppa:ansible/ansible\","                                  >> deployment.tf
-echo "      \"sudo apt-get install ansible -y\","                                                             >> deployment.tf
-echo "      \"sudo mv \${var.keypair}.pem /tmp/\${var.keypair}.pem\","                                          >> deployment.tf
-echo "      \"sudo chmod 400 /tmp/\${var.keypair}.pem\","                                                      >> deployment.tf
-echo "      \"sudo rm /etc/ansible/ansible.cfg && sudo mv ansible.cfg /etc/ansible/ansible.cfg\","            >> deployment.tf
-echo "      \"sudo rm /etc/ansible/hosts && sudo mv hosts /etc/ansible/hosts\","                              >> deployment.tf
-echo "      \"sudo mkdir /opt/ansible-files && sudo mv * /opt/ansible-files/\","                              >> deployment.tf
-echo "      \"ansible-playbook /opt/ansible-files/packages.yml --private-key /tmp/\${var.keypair}.pem\","      >> deployment.tf
-echo "      \"ansible-playbook /opt/ansible-files/zoo.yml --private-key /tmp/\${var.keypair}.pem\","           >> deployment.tf
-echo "      \"ansible-playbook /opt/ansible-files/kafka.yml --private-key /tmp/\${var.keypair}.pem\","         >> deployment.tf
-if [ $SCHEMA -gt 0 ]                                                                                            
-then
-    echo "      \"ansible-playbook /opt/ansible-files/schema-registry.yml --private-key /tmp/\${var.keypair}.pem\","  >> deployment.tf
-fi
-
-if [ $MM -gt 0 ]
-then 
-    echo "      \"ansible-playbook /opt/ansible-files/mm.yml --private-key /tmp/\${var.keypair}.pem\"," >> deployment.tf     
-fi
-
-if [ $CRUISE -gt 0 ]
-then
-    echo "      \"ansible-playbook /opt/ansible-files/cruisecontrol.yml --private-key /tmp/\${var.keypair}.pem\","  >> deployment.tf
-fi
-
-echo "      \"ansible-playbook /opt/ansible-files/service-start.yml --private-key /tmp/\${var.keypair}.pem\""  >> deployment.tf
-
-echo "    ]"                                                                                                  >> deployment.tf
-echo "  }"                                                                                                    >> deployment.tf
-echo "}"                                                                                                      >> deployment.tf
-echo "output \"ansible_public_ip\" {"                                                                         >> deployment.tf
-echo "  value = aws_instance.ansible.public_ip"                                                               >> deployment.tf
-echo "}"                                                                                                      >> deployment.tf
-
-#########################################################################################################
 #########                        ANSIBLE CONFIG TERRAFORM FILE                                  #########
 #########################################################################################################
 
@@ -271,7 +231,7 @@ then
     echo " "                                                                                                  >> ansibleconf.tf
 fi
 
-if [ $CRUISE -gt 0 ]
+if [ $CRUISE == "true" ]
 then
     echo "[cruise]"                                                                                           >> ansibleconf.tf
     echo "%{ for ip in aws_instance.ec2cruise.*.private_ip ~}"                                                >> ansibleconf.tf
@@ -338,64 +298,6 @@ then
     echo "    aws_instance.ec2broker, aws_instance.ec2mm"                                                     >> ansibleconf.tf
     echo "  ]"                                                                                                >> ansibleconf.tf
     echo "}"                                                                                                  >> ansibleconf.tf    
-fi
-
-#########################################################################################################
-#########                        SERVICE START YAML FILE                                        #########
-#########################################################################################################
-
-echo "---"                                                              > ansible/service-start.yml
-echo "- name: Start Zookeeper Services"                                 >> ansible/service-start.yml
-echo "  hosts: zoo"                                                     >> ansible/service-start.yml
-echo "  remote_user: ubuntu"                                            >> ansible/service-start.yml
-echo "  serial: 1"                                                      >> ansible/service-start.yml
-echo "  tasks:"                                                         >> ansible/service-start.yml
-echo "  - name: Start zookeeper service"                                >> ansible/service-start.yml
-echo "    become: true"                                                 >> ansible/service-start.yml
-echo "    systemd:"                                                     >> ansible/service-start.yml
-echo "      name: zookeeper.service"                                    >> ansible/service-start.yml
-echo "      state: started"                                             >> ansible/service-start.yml
-echo "      enabled: true"                                              >> ansible/service-start.yml
-echo "- name: Start Kafka Services"                                     >> ansible/service-start.yml
-echo "  hosts: kafka"                                                   >> ansible/service-start.yml
-echo "  remote_user: ubuntu"                                            >> ansible/service-start.yml
-echo "  serial: 1"                                                      >> ansible/service-start.yml
-echo "  tasks:"                                                         >> ansible/service-start.yml
-echo "  - name: Start kafka service"                                    >> ansible/service-start.yml
-echo "    become: true"                                                 >> ansible/service-start.yml
-echo "    systemd:"                                                     >> ansible/service-start.yml
-echo "      name: kafka.service"                                        >> ansible/service-start.yml
-echo "      state: started"                                             >> ansible/service-start.yml
-echo "      enabled: true"                                              >> ansible/service-start.yml
-
-if [ $SCHEMA -gt 0 ]
-then
-    echo "- name: Start Schema Registry Services"                       >> ansible/service-start.yml
-    echo "  hosts: schemareg"                                           >> ansible/service-start.yml
-    echo "  remote_user: ubuntu"                                        >> ansible/service-start.yml
-    echo "  serial: 1"                                                  >> ansible/service-start.yml
-    echo "  tasks:"                                                     >> ansible/service-start.yml
-    echo "  - name: Start schema registry service"                      >> ansible/service-start.yml
-    echo "    become: true"                                             >> ansible/service-start.yml
-    echo "    systemd:"                                                 >> ansible/service-start.yml
-    echo "      name: schema-registry.service"                          >> ansible/service-start.yml
-    echo "      state: started"                                         >> ansible/service-start.yml
-    echo "      enabled: true"                                          >> ansible/service-start.yml
-fi
-
-if [ $CRUISE -gt 0 ]
-then
-    echo "- name: Start Cruise Control Services"                        >> ansible/service-start.yml
-    echo "  hosts: cruise"                                              >> ansible/service-start.yml
-    echo "  remote_user: ubuntu"                                        >> ansible/service-start.yml
-    echo "  serial: 1"                                                  >> ansible/service-start.yml
-    echo "  tasks:"                                                     >> ansible/service-start.yml
-    echo "  - name: Start cruise control service"                       >> ansible/service-start.yml
-    echo "    become: true"                                             >> ansible/service-start.yml
-    echo "    systemd:"                                                 >> ansible/service-start.yml
-    echo "      name: cruise.service"                                   >> ansible/service-start.yml
-    echo "      state: started"                                         >> ansible/service-start.yml
-    echo "      enabled: true"                                          >> ansible/service-start.yml
 fi
 
 #########################################################################################################
