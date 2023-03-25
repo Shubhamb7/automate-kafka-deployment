@@ -9,7 +9,7 @@
       path: "/opt/mm/systemlogs"
       state: directory
       mode: '0755'
-  - name: Remove existing kafka properties file
+  - name: Remove existing mirror maker properties file
     become: true
     file:
       path: /opt/kafka/config/connect-mirror-maker.properties

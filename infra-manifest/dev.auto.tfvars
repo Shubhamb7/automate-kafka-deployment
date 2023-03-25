@@ -40,7 +40,8 @@ connect_configuration = {
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",
-    "sg" = "kafkaSG"
+    "sg" = "kafkaSG",
+    "s3bucket_name" = "kafka-connect-s3-test-1234"
 }
 
 schema_configuration = {

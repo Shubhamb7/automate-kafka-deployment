@@ -44,6 +44,7 @@ done
 
 if [ $CRUISE == "false" ]
 then
+    sed -i "9s/^/#/" ansible/packages.yml
     sed -i "38,45s/^/#/" ansible/kafka.yml
     sed -i "141s/^/#/" ansible/server.properties.j2
     sed -i "41s/^/#/" deployment.tf
@@ -57,18 +58,30 @@ if [ $SCHEMA -gt 0 ]
 then
     sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/schema-registry.yml
 else
+    sed -i "8s/^/#/" ansible/packages.yml
     sed -i "39s/^/#/" deployment.tf
     sed -i "24,34s/^/#/" ansible/service-start.yml
 fi
 
-if [ $CONN == 0 ]
+if [ $CONN -gt 0 ]
 then
-    sed -i "28s/^/#/" ansible/packages.yml
+    REGION=$(cat dev.auto.tfvars | grep aws_region | awk '{print substr($3, 2, length($3)-2)}')
+    S3NAME=$(cat dev.auto.tfvars | grep s3bucket_name | awk '{print substr($3, 2, length($3)-2)}')
+    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/connect.yml
+    sed -i "s/bucket_region: \"\"/bucket_region: \"$REGION\"/g" ansible/connect.yml
+    sed -i "s/bucket_name: \"\"/bucket_name: \"$S3NAME\"/g" ansible/connect.yml
+else
+    sed -i "46,56s/^/#/" ansible/service-start.yml
+    sed -i "58s/^/#/" ansible/packages.yml
+    sed -i "7s/^/#/" ansible/packages.yml
+    sed -i "42s/^/#/" deployment.tf
 fi
 
 if [ $MM == 0 ]
 then
-    sed -i "27s/^/#/" ansible/packages.yml
+    sed -i "57s/^/#/" ansible/packages.yml
+    sed -i "6s/^/#/" ansible/packages.yml
+    sed -i "40s/^/#/" deployment.tf
 fi
 
 sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/kafka.yml

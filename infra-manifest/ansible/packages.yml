@@ -1,6 +1,12 @@
 ---
 - name: Global Packages
-  hosts: all
+  hosts:
+    - kafka
+    - zoo
+#    - mm 
+#    - connect
+#    - schema
+#    - cruise
   remote_user: ubuntu
   tasks:
     - name: Update apt repo and cache
@@ -20,12 +26,36 @@
         name: openjdk-11-jdk
         state: present
         update_cache: yes
+    - name: Install unzip
+      become: true
+      apt:
+        name: unzip
+        state: present
+        update_cache: yes
+    - name: Install net-tools
+      become: true
+      apt:
+        name: net-tools
+        state: present
+        update_cache: yes
+    - name: Create monitoring directory
+      become: true
+      file:
+        path: "/opt/monitoring"
+        state: directory
+        mode: '0755'
+    - name: Download JMX exporter
+      become: true
+      get_url:
+        url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.18.0/jmx_prometheus_javaagent-0.18.0.jar
+        dest: /opt/monitoring/jmx_prometheus_javaagent-0.18.0.jar
+        mode: 0440
 - name: Kafka Packages
   hosts: 
     - kafka
     - zoo
-    - mm
-    - connect
+#    - mm
+#    - connect
   remote_user: ubuntu
   tasks:
     - name: Download Kafka
@@ -48,15 +78,3 @@
       file:
         path: /opt/kafka_2.13-3.3.1.tgz
         state: absent
-    - name: Create monitoring directory
-      become: true
-      file:
-        path: "/opt/monitoring"
-        state: directory
-        mode: '0755'
-    - name: Download JMX exporter
-      become: true
-      get_url:
-        url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.18.0/jmx_prometheus_javaagent-0.18.0.jar
-        dest: /opt/monitoring/jmx_prometheus_javaagent-0.18.0.jar
-        mode: 0440

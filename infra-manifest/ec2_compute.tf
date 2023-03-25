@@ -75,6 +75,7 @@ resource "aws_instance" "ec2connect" {
   vpc_security_group_ids = [aws_security_group.sg.id]
   key_name               = var.keypair
   iam_instance_profile   = "SSMforEC2"
+  depends_on             = [aws_s3_bucket.connect_s3bucket, aws_s3_bucket_public_access_block.connect_s3bucket_public_access, aws_s3_bucket_policy.connect_s3bucket_policy]
   
   root_block_device {
     volume_size           = var.connect_configuration["disk"]

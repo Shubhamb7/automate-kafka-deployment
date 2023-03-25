@@ -1,0 +1,68 @@
+---
+- name: Kafka Connect Configuration
+  hosts: connect
+  remote_user: ubuntu
+  vars:
+    kafka_ips: ""
+    bucket_region: ""
+    bucket_name: ""
+  tasks:
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "/opt/connect/systemlogs"
+      state: directory
+      mode: '0755'
+  - name: Create plugin directory
+    become: true
+    file:
+      path: "/opt/connect/plugin"
+      state: directory
+      mode: '0755'
+  - name: Upload s3 sink connector zip to the server
+    become: true
+    copy:
+      src: /opt/ansible-files/confluentinc-kafka-connect-s3-10.4.2.zip
+      dest: /tmp/
+      owner: root
+      group: root
+      mode: 0644
+  - name: Extract the s3 sink connector zip
+    become: true
+    unarchive:
+      src: /tmp/confluentinc-kafka-connect-s3-10.4.2.zip
+      dest: /opt/connect/plugin/
+      remote_src: yes
+  - name: Remove existing connect properties file
+    become: true
+    file:
+      path: /opt/kafka/config/connect-standalone.properties
+      state: absent
+  - name: Generate connect properties file from template
+    become: true
+    template:
+      src: /opt/ansible-files/connect-standalone.properties.j2
+      dest: /opt/kafka/config/connect-standalone.properties
+  - name: Generate s3 sink connector properties file from template
+    become: true
+    template:
+      src: /opt/ansible-files/connect-s3-sink.properties.j2
+      dest: /opt/kafka/config/connect-s3-sink.properties
+  - name: Upload local connect service file to the server
+    become: true
+    copy:
+      src: /opt/ansible-files/connect.service
+      dest: /etc/systemd/system/
+      owner: root
+      group: root
+      mode: 0644
+  - name: just force systemd to reread configs
+    become: true
+    systemd:
+      daemon_reload: yes
+  # - name: Enable connect service
+  #   become: true
+  #   systemd:
+  #     name: connect.service
+  #     enabled: true
+  #     masked: no

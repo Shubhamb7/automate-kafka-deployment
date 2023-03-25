@@ -6,7 +6,7 @@
     data_dir: /opt/kafkadata/kafka-logs
     broker_id: "{{ansible_hostname | regex_replace('.*(.)$', '\\1')}}"
     private_ip: "{{ hostvars[ inventory_hostname ]['ansible_default_ipv4']['address'] }}"
-    zoo_ips: ""
+    zoo_ips: "{{hostvars[groups['zoo'][0]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][1]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][2]]['inventory_hostname']}}:2181"
   tasks:
   - name: Create sys log directory
     become: true
@@ -35,14 +35,14 @@
       owner: root
       group: root
       mode: 0644
-  - name: Upload cruise control metrics exporter to the servers
-    become: true
-    copy:
-      src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
-      dest: /opt/kafka/libs/
-      owner: root
-      group: root
-      mode: 0644
+#  - name: Upload cruise control metrics exporter to the servers
+#    become: true
+#    copy:
+#      src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
+#      dest: /opt/kafka/libs/
+#      owner: root
+#      group: root
+#      mode: 0644
   - name: Download JMX exporter kafka metrics yml file
     become: true
     get_url:
