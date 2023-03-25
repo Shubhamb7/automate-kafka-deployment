@@ -5,7 +5,7 @@
     - zoo
 #    - mm 
 #    - connect
-#    - schema
+#    - schemareg
 #    - cruise
   remote_user: ubuntu
   tasks:
