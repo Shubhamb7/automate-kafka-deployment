@@ -237,7 +237,7 @@ fi
 
 if [ $SCHEMA -gt 0 ]
 then
-    echo "[schemareg]"                                                                                        >> ansibleconf.tf
+    echo "[schema]"                                                                                        >> ansibleconf.tf
     echo "%{ for ip in aws_instance.ec2schemareg.*.private_ip ~}"                                             >> ansibleconf.tf
     echo "\${ip}"                                                                                             >> ansibleconf.tf
     echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
