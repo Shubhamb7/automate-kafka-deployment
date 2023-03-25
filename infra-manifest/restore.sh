@@ -13,4 +13,4 @@ sed -i "57,58s/^#//" ansible/packages.yml
 sed -i "4,9s/^#//" ansible/packages.yml
 sed -i "24,56s/^#//" ansible/service-start.yml
 sed -i "141s/^#//" ansible/server.properties.j2
-sed -i "39,42s/^#//" deployment.tf
+sed -i "39,43s/^#//" deployment.tf

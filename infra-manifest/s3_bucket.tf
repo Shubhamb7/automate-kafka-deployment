@@ -1,7 +1,8 @@
 resource "aws_s3_bucket" "connect_s3bucket" {
-  count = var.connect_configuration["connect_count"] != 0 ? 1 : 0
+  count = tonumber(var.connect_configuration["connect_count"]) == 0 ? 0 : 1
   bucket = var.connect_configuration["s3bucket_name"]
   force_destroy = true
+ 
   tags = {
     Name = "${var.connect_configuration["s3bucket_name"]}"
   }
@@ -37,8 +38,8 @@ resource "aws_s3_bucket_policy" "connect_s3bucket_policy" {
                 "s3:GetBucketLocation"
             ],
             "Resource": [
-                "arn:aws:s3:::kafka-connect-s3-test-1234/*",
-                "arn:aws:s3:::kafka-connect-s3-test-1234"
+                "arn:aws:s3:::${var.connect_configuration["s3bucket_name"]}/*",
+                "arn:aws:s3:::${var.connect_configuration["s3bucket_name"]}"
             ]
         }
     ]

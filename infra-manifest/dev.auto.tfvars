@@ -1,13 +1,13 @@
 profile    = "default"
 env        = "kafka"
-aws_region = "us-west-1"
+aws_region = "us-east-1"
 
-keypair = "kafkacali"
+keypair = "terraform-test"
 userssh = "ubuntu"
 key_path = "~/Downloads/"
 
 vpc_cidr_block = "10.25.0.0/16"
-subnet_availability_zones = ["us-west-1a"]
+subnet_availability_zones = ["us-east-1a"]
 public_subnet_cidr        = ["10.25.1.0/24"]
 private_subnet_cidr        = ["10.25.2.0/24"]
 
@@ -41,7 +41,7 @@ connect_configuration = {
     "disk" = 25,
     "subnet" = "public",
     "sg" = "kafkaSG",
-    "s3bucket_name" = "kafka-connect-s3-test-1234"
+    "s3bucket_name" = "kafka-connect-s3-test-east"
 }
 
 schema_configuration = {

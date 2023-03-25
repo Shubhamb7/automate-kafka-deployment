@@ -13,10 +13,11 @@ MM=$(cat dev.auto.tfvars | grep mm_count | awk '{print substr($3, 1, length($3)-
 CONN=$(cat dev.auto.tfvars | grep connect_count | awk '{print substr($3, 1, length($3)-1)}')
 SCHEMA=$(cat dev.auto.tfvars | grep schema_count | awk '{print substr($3, 1, length($3)-1)}')
 CRUISE=$(cat dev.auto.tfvars | grep cruise_deploy | awk '{print substr($3, 2, length($3)-3)}')
+PROVECTUS=$(cat dev.auto.tfvars | grep provectus_deploy | awk '{print substr($3, 2, length($3)-3)}')
 
 DISK=$(cat dev.auto.tfvars | grep disk | head -n 1 | awk -F= '{print substr($2,1,length($2)-1)}')
 
-echo zoo=$ZOO kafka=$KAFKA mm=$MM connect=$CONN schema=$SCHEMA cruise=$CRUISE
+echo zoo=$ZOO kafka=$KAFKA mm=$MM connect=$CONN schema=$SCHEMA cruise=$CRUISE provectus-kafka-ui=$PROVECTUS
 
 ZOO_IPS=""
 KAFKA_IPS=""
@@ -52,6 +53,14 @@ then
 else
     sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/cruisecontrol.yml
     sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/cruisecontrol.yml
+fi
+
+if [ $PROVECTUS == "false" ]
+then
+    sed -i "43s/^/#/" deployment.tf
+else
+    sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/provectus.yml
+    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/provectus.yml
 fi
 
 if [ $SCHEMA -gt 0 ]
@@ -248,6 +257,14 @@ if [ $CRUISE == "true" ]
 then
     echo "[cruise]"                                                                                           >> ansibleconf.tf
     echo "%{ for ip in aws_instance.ec2cruise.*.private_ip ~}"                                                >> ansibleconf.tf
+    echo "\${ip}"                                                                                             >> ansibleconf.tf
+    echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
+fi
+
+if [ $PROVECTUS == "true" ]
+then
+    echo "[provectus]"                                                                                           >> ansibleconf.tf
+    echo "%{ for ip in aws_instance.ec2provectus.*.private_ip ~}"                                                >> ansibleconf.tf
     echo "\${ip}"                                                                                             >> ansibleconf.tf
     echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
 fi

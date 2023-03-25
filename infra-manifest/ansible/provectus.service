@@ -1,0 +1,12 @@
+[Unit]
+Description=Provectus Kafka UI Daemon
+Requires=network-online.target
+[Service]
+WorkingDirectory=/opt/provectus/
+User=root
+Group=root
+Type=simple
+ExecStart=/bin/sh -c 'java -Dspring.config.additional-location=provectus-app.yml -jar kafka-ui-api-v0.6.0.jar > /opt/provectus/provectus.log 2>&1'
+Restart=on-abnormal
+[Install]
+WantedBy=multi-user.target
