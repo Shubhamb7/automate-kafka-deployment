@@ -16,9 +16,9 @@ kafka:
 #          address: {{ connect_ips }}
       # schemaRegistry: http://localhost:8085
       # ksqldbServer: http://localhost:8088
-      # metrics:
-      #   port: 9997
-      #   type: JMX
+      metrics:
+        port: 7071
+        type: PROMETHEUS
   #    -
   #      name: secondLocal
   #      bootstrapServers: localhost:9093
