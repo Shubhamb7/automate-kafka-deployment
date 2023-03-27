@@ -21,6 +21,7 @@ echo zoo=$ZOO kafka=$KAFKA mm=$MM connect=$CONN schema=$SCHEMA cruise=$CRUISE pr
 
 ZOO_IPS=""
 KAFKA_IPS=""
+CONN_IPS=""
 PUBLIC_KAFKA_IPS=""
 
 for((i=0;i<$ZOO;i++))
@@ -59,6 +60,20 @@ if [ $PROVECTUS == "false" ]
 then
     sed -i "43s/^/#/" deployment.tf
 else
+    if [ $CONN -gt 0 ]
+    then
+        for((i=0;i<$CONN;i++))
+        do
+            if [ "$CONN" == "$((i+1))" ]
+            then
+                CONN_IPS=$CONN_IPS"http:\/\/{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:8083"
+            else
+                CONN_IPS=$CONN_IPS"http:\/\/{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:8083,"
+            fi
+        done
+
+        sed -i "s/connect_ips: \"\"/connect_ips: \"$CONN_IPS\"/g" ansible/provectus.yml
+    fi
     sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/provectus.yml
     sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/provectus.yml
 fi
@@ -84,6 +99,8 @@ else
     sed -i "58s/^/#/" ansible/packages.yml
     sed -i "7s/^/#/" ansible/packages.yml
     sed -i "42s/^/#/" deployment.tf
+    sed -i "8s/^/#/" ansible/provectus.yml
+    sed -i "14,16s/^/#/" ansible/provectus-app.yml.j2
 fi
 
 if [ $MM == 0 ]

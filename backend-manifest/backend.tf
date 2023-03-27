@@ -9,12 +9,12 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-1"
   profile = "default"
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "kafka-tf-state-12-east"
+  bucket = "kafka-tf-state-west"
   force_destroy = true
 }
 
@@ -37,7 +37,7 @@ resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
 }
 
 resource "aws_dynamodb_table" "terraform_lock" {
-  name = "terraform-kafka-state-lock-12-east"
+  name = "terraform-kafka-state-lock-west"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "LockID"
   attribute {

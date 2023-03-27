@@ -101,6 +101,15 @@ resource "aws_security_group_rule" "schema-registry" {
   security_group_id = aws_security_group.sg.id
 }
 
+resource "aws_security_group_rule" "kafka-connect" {
+  type              = "ingress"
+  from_port         = 8083
+  to_port           = 8083
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.sg.id
+}
+
 resource "aws_security_group_rule" "prometheus" {
   type              = "ingress"
   from_port         = 9090
@@ -135,8 +144,4 @@ resource "aws_security_group_rule" "jmx_exporter" {
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.sg.id
-}
-
-output "security_group_ids" {
-  value = aws_security_group.sg.id
 }
