@@ -99,7 +99,6 @@ else
     sed -i "58s/^/#/" ansible/packages.yml
     sed -i "7s/^/#/" ansible/packages.yml
     sed -i "42s/^/#/" deployment.tf
-    sed -i "8s/^/#/" ansible/provectus.yml
     sed -i "14,16s/^/#/" ansible/provectus-app.yml.j2
 fi
 
