@@ -3,12 +3,11 @@ Deploying Kafka cluster with other Kafka Components on AWS using Terraform and A
 
 ## Components:
 
-* Zookeeper 
-
+* Zookeeper
+* Kafka Broker
 * Apicurio Schema Registry
-
-* Mirror Maker for data replication accross region
-
-* Linked in Cruise Control or Provectus Kafka UI for User Interface
-
-* Prometheus and Grafana for monitoring
+* Mirror Maker 
+* Linked in Cruise Control
+* Provectus Kafka UI
+* Prometheus
+* Grafana
