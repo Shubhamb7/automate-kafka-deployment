@@ -20,11 +20,14 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "kafka"
+  - job_name: "kafka-jmx"
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
     static_configs:
       - targets: [{{ kafka_ips }}]
+  - job_name: "kafka-kafka_exporter"
+    static_configs:
+      - targets: [{{ kafka_exporter_ips }}]
   - job_name: "zookeeper"
     static_configs:
       - targets: [{{ zoo_ips }}]

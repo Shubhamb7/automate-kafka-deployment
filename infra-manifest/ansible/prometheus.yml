@@ -7,36 +7,8 @@
     zoo_ips: ""
     connect_ips: ""
     mm_ips: ""
+    kafka_exporter_ips: ""
   tasks:
-    - name: Update apt repo and cache
-      become: true
-      apt:
-        update_cache: yes
-        force_apt_get: yes
-        cache_valid_time: 3600
-    - name: Upgrade all packages
-      become: true
-      apt:
-        upgrade: dist
-        force_apt_get: yes
-    - name: Install openjdk 11
-      become: true
-      apt:
-        name: openjdk-11-jdk
-        state: present
-        update_cache: yes
-    - name: Install unzip
-      become: true
-      apt:
-        name: unzip
-        state: present
-        update_cache: yes
-    - name: Install net-tools
-      become: true
-      apt:
-        name: net-tools
-        state: present
-        update_cache: yes
     - name: Download prometheus tar
       become: true
       get_url:

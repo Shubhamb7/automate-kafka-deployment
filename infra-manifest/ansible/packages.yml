@@ -3,10 +3,16 @@
   hosts:
     - kafka
     - zoo
-    - mm 
+#    - mm 
 #    - connect
 #    - schemareg
 #    - cruise
+#    - prometheus
+#    - grafana
+
+
+
+    
   remote_user: ubuntu
   tasks:
     - name: Update apt repo and cache
@@ -54,7 +60,7 @@
   hosts: 
     - kafka
     - zoo
-    - mm
+#    - mm
 #    - connect
   remote_user: ubuntu
   tasks:

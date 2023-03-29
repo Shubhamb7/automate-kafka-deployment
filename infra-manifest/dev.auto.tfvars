@@ -28,7 +28,7 @@ zoo_configuration = {
 }
 
 mm_configuration = {
-    "mm_count" = 1,
+    "mm_count" = 0,
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",
@@ -41,7 +41,7 @@ connect_configuration = {
     "disk" = 25,
     "subnet" = "public",
     "sg" = "kafkaSG",
-    "s3bucket_name" = "kafka-connect-s3-test-west"
+    "s3bucket_name" = "kafka-connect-s3-test-west-1"
 }
 
 schema_configuration = {

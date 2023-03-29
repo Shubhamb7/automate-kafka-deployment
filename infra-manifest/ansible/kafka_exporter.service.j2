@@ -1,0 +1,10 @@
+[Unit]
+Description=Kafka Exporter Daemon
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/bin/sh -c '/opt/monitoring/kafka_exporter --kafka.server={{ private_ip }}:9092 --kafka.version=3.3.1 > /opt/monitoring/kafka-exporter.log 2>&1'
+Restart=on-abnormal
+[Install]
+WantedBy=multi-user.target

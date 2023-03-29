@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "kafka-tf-state-west"
+  bucket = "kafka-tf-state-west-1"
   force_destroy = true
 }
 
@@ -37,7 +37,7 @@ resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
 }
 
 resource "aws_dynamodb_table" "terraform_lock" {
-  name = "terraform-kafka-state-lock-west"
+  name = "terraform-kafka-state-lock-west-1"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "LockID"
   attribute {

@@ -1,0 +1,19 @@
+Kafka commands
+
+List topics:
+/opt/kafka/bin/kafka-topics.sh --bootstrap-server=10.25.1.29:9092,10.25.1.50:9092,10.25.1.251:9092--list
+
+Create topic:
+/opt/kafka/bin/kafka-topics.sh --bootstrap-server=10.25.1.29:9092,10.25.1.50:9092,10.25.1.251:9092--create --topic  
+
+Delete topic:
+/opt/kafka/bin/kafka-topics.sh --bootstrap-server=10.25.1.29:9092,10.25.1.50:9092,10.25.1.251:9092--topic <topic-name> --delete
+
+Console Producer:
+/opt/kafka/bin/kafka-console-producer.sh --bootstrap-server=10.25.1.29:9092,10.25.1.50:9092,10.25.1.251:9092--topic
+
+Console Consumer:
+/opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server=10.25.1.29:9092,10.25.1.50:9092,10.25.1.251:9092--topic
+
+kafka cluster public ips:
+18.144.41.189:9094,54.177.249.8:9094,3.101.134.197:9094,

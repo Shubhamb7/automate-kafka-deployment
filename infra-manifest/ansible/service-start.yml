@@ -54,3 +54,14 @@
 #      name: connect.service
 #      state: started
 #      enabled: true
+- name: Start Kafka Exporter Services
+  hosts: kafka
+  remote_user: ubuntu
+  serial: 1
+  tasks:
+  - name: Start kafka exporter service
+    become: true
+    systemd:
+      name: kafka_exporter.service
+      state: started
+      enabled: true
