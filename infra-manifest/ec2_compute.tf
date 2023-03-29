@@ -201,3 +201,55 @@ sudo hostnamectl set-hostname kafka-ui
   }
 
 }
+
+resource "aws_instance" "ec2prometheus" {
+  count                  = var.prometheus_configuration["prom_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.prometheus_configuration["instance_type"]
+  subnet_id              = var.prometheus_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+
+  root_block_device {
+    volume_size           = var.prometheus_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname prometheus${count.index + 1}
+EOF
+  tags = {
+    Name = "prometheus${count.index + 1}"
+  }
+
+}
+
+resource "aws_instance" "ec2grafana" {
+  count                  = var.grafana_configuration["grafana_count"]
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.grafana_configuration["instance_type"]
+  subnet_id              = var.grafana_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
+  vpc_security_group_ids = [aws_security_group.sg.id]
+  key_name               = var.keypair
+  iam_instance_profile   = "SSMforEC2"
+
+  root_block_device {
+    volume_size           = var.grafana_configuration["disk"]
+    volume_type           = "gp2"
+    encrypted             = true
+    delete_on_termination = true
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+sudo hostnamectl set-hostname grafana${count.index + 1}
+EOF
+  tags = {
+    Name = "grafana${count.index + 1}"
+  }
+
+}

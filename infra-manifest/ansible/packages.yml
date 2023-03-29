@@ -3,7 +3,7 @@
   hosts:
     - kafka
     - zoo
-#    - mm 
+    - mm 
 #    - connect
 #    - schemareg
 #    - cruise
@@ -54,7 +54,7 @@
   hosts: 
     - kafka
     - zoo
-#    - mm
+    - mm
 #    - connect
   remote_user: ubuntu
   tasks:

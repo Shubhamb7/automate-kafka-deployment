@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus Daemon
+Requires=network-online.target
+[Service]
+User=root
+Group=root
+Type=simple
+Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+ExecStart=/bin/sh -c '/opt/prometheus/prometheus --config.file=/opt/prometheus/prometheus-config.yml > /opt/prometheus/systemlogs/prometheus.log 2>&1'
+Restart=on-abnormal
+[Install]
+WantedBy=multi-user.target

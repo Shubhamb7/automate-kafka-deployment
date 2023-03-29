@@ -43,12 +43,14 @@
 #      owner: root
 #      group: root
 #      mode: 0644
-  - name: Download JMX exporter kafka metrics yml file
+  - name: Upload JMX exporter kafka metrics yml file
     become: true
-    get_url:
-      url: https://raw.githubusercontent.com/prometheus/jmx_exporter/main/example_configs/kafka-0-8-2.yml
-      dest: /opt/monitoring/kafka-jmx.yml
-      mode: 0440
+    copy:
+      src: /opt/ansible-files/kafka-jmx.yml
+      dest: /opt/monitoring/
+      owner: root
+      group: root
+      mode: 0644
   - name: just force systemd to reread configs
     become: true
     systemd:

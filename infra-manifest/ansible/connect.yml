@@ -56,6 +56,12 @@
       owner: root
       group: root
       mode: 0644
+  - name: Download JMX exporter connect metrics yml file
+    become: true
+    get_url:
+      url: https://raw.githubusercontent.com/prometheus/jmx_exporter/main/example_configs/kafka-connect.yml
+      dest: /opt/monitoring/connect-jmx.yml
+      mode: 0440
   - name: just force systemd to reread configs
     become: true
     systemd:

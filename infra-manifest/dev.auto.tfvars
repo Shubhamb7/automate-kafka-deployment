@@ -28,7 +28,7 @@ zoo_configuration = {
 }
 
 mm_configuration = {
-    "mm_count" = 0,
+    "mm_count" = 1,
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",
@@ -61,9 +61,25 @@ cruise_configuration = {
 }
 
 provectus_ui_configuration = {
-    "provectus_deploy" = "false",
+    "provectus_deploy" = "true",
     "instance_type" = "t2.medium",
     "disk" = 30,
+    "subnet" = "public",
+    "sg" = "kafkaSG"
+}
+
+prometheus_configuration = {
+    "prom_count" = 0,
+    "instance_type" = "t2.large",
+    "disk" = 40,
+    "subnet" = "public",
+    "sg" = "kafkaSG"
+}
+
+grafana_configuration = {
+    "grafana_count" = 0,
+    "instance_type" = "t2.medium",
+    "disk" = 25,
     "subnet" = "public",
     "sg" = "kafkaSG"
 }

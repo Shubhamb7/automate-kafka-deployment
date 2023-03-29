@@ -14,6 +14,8 @@ CONN=$(cat dev.auto.tfvars | grep connect_count | awk '{print substr($3, 1, leng
 SCHEMA=$(cat dev.auto.tfvars | grep schema_count | awk '{print substr($3, 1, length($3)-1)}')
 CRUISE=$(cat dev.auto.tfvars | grep cruise_deploy | awk '{print substr($3, 2, length($3)-3)}')
 PROVECTUS=$(cat dev.auto.tfvars | grep provectus_deploy | awk '{print substr($3, 2, length($3)-3)}')
+PROMETHEUS=$(cat dev.auto.tfvars | grep prom_count | awk '{print substr($3, 1, length($3)-1)}')
+GRAFANA=$(cat dev.auto.tfvars | grep grafana_count | awk '{print substr($3, 1, length($3)-1)}')
 
 DISK=$(cat dev.auto.tfvars | grep disk | head -n 1 | awk -F= '{print substr($2,1,length($2)-1)}')
 
@@ -22,6 +24,10 @@ echo zoo=$ZOO kafka=$KAFKA mm=$MM connect=$CONN schema=$SCHEMA cruise=$CRUISE pr
 ZOO_IPS=""
 KAFKA_IPS=""
 CONN_IPS=""
+CONN_PROMETHEUS_IPS=""
+KAFKA_PROMETHEUS_IPS=""
+ZOO_PROMETHEUS_IPS=""
+MM_PROMETHEUS_IPS=""
 PUBLIC_KAFKA_IPS=""
 
 for((i=0;i<$ZOO;i++))
@@ -107,6 +113,71 @@ then
     sed -i "57s/^/#/" ansible/packages.yml
     sed -i "6s/^/#/" ansible/packages.yml
     sed -i "40s/^/#/" deployment.tf
+fi
+
+if [ $GRAFANA == 0 ]
+then
+    sed -i "45s/^/#/" deployment.tf
+fi
+
+if [ $PROMETHEUS -gt 0 ]
+then
+    for((i=0;i<$KAFKA;i++))
+    do
+        if [ "$KAFKA" == "$((i+1))" ]
+        then
+            KAFKA_PROMETHEUS_IPS=$KAFKA_PROMETHEUS_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:7071"
+        else
+            KAFKA_PROMETHEUS_IPS=$KAFKA_PROMETHEUS_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:7071,"
+        fi
+    done
+    
+    for((i=0;i<$ZOO;i++))
+    do
+        if [ "$ZOO" == "$((i+1))" ]
+        then
+            ZOO_PROMETHEUS_IPS=$ZOO_PROMETHEUS_IPS"{{hostvars[groups['zoo'][$i]]['inventory_hostname']}}:7071"
+        else
+            ZOO_PROMETHEUS_IPS=$ZOO_PROMETHEUS_IPS"{{hostvars[groups['zoo'][$i]]['inventory_hostname']}}:7071,"
+        fi
+    done
+
+    if [ $CONN -gt 0 ]
+    then
+        for((i=0;i<$CONN;i++))
+        do
+            if [ "$CONN" == "$((i+1))" ]
+            then
+                CONN_PROMETHEUS_IPS=$CONN_PROMETHEUS_IPS"{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:7071"
+            else
+                CONN_PROMETHEUS_IPS=$CONN_PROMETHEUS_IPS"{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:7071,"
+            fi
+        done
+    else
+        sed -i "31,33s/^/#/" ansible/prometheus-config.yml.j2
+    fi
+
+    if [ $MM -gt 0 ]
+    then
+        for((i=0;i<$MM;i++))
+        do
+            if [ "$MM" == "$((i+1))" ]
+            then
+                MM_PROMETHEUS_IPS=$MM_PROMETHEUS_IPS"{{hostvars[groups['mm'][$i]]['inventory_hostname']}}:7071"
+            else
+                MM_PROMETHEUS_IPS=$MM_PROMETHEUS_IPS"{{hostvars[groups['mm'][$i]]['inventory_hostname']}}:7071,"
+            fi
+        done
+    else
+        sed -i "34,36s/^/#/" ansible/prometheus-config.yml.j2
+    fi
+
+    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
+    sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
+    sed -i "s/connect_ips: \"\"/connect_ips: \"$CONN_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
+    sed -i "s/mm_ips: \"\"/mm_ips: \"$MM_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
+else
+    sed -i "44s/^/#/" deployment.tf
 fi
 
 sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/kafka.yml
@@ -275,6 +346,7 @@ then
     echo "%{ for ip in aws_instance.ec2cruise.*.private_ip ~}"                                                >> ansibleconf.tf
     echo "\${ip}"                                                                                             >> ansibleconf.tf
     echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
+    echo " "                                                                                                  >> ansibleconf.tf
 fi
 
 if [ $PROVECTUS == "true" ]
@@ -283,11 +355,35 @@ then
     echo "%{ for ip in aws_instance.ec2provectus.*.private_ip ~}"                                                >> ansibleconf.tf
     echo "\${ip}"                                                                                             >> ansibleconf.tf
     echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
+    echo " "                                                                                                  >> ansibleconf.tf
+
+fi
+
+if [ $PROMETHEUS -gt 0 ]
+then
+    echo "[prometheus]"                                                                                           >> ansibleconf.tf
+    echo "%{ for ip in aws_instance.ec2prometheus.*.private_ip ~}"                                                >> ansibleconf.tf
+    echo "\${ip}"                                                                                             >> ansibleconf.tf
+    echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
+    echo " "                                                                                                  >> ansibleconf.tf
+
+fi
+
+if [ $GRAFANA -gt 0 ]
+then
+    echo "[grafana]"                                                                                           >> ansibleconf.tf
+    echo "%{ for ip in aws_instance.ec2grafana.*.private_ip ~}"                                                >> ansibleconf.tf
+    echo "\${ip}"                                                                                             >> ansibleconf.tf
+    echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
+    echo " "                                                                                                  >> ansibleconf.tf
+
 fi
 
 echo "  EOT"                                                                                              >> ansibleconf.tf
 echo "  filename = \"./ansible/hosts\""                                                                   >> ansibleconf.tf
 echo "}"                                                                                                  >> ansibleconf.tf
+echo " "                                                                                                  >> ansibleconf.tf
+
 
 if [ $MM -gt 0 ]
 then
@@ -314,9 +410,9 @@ then
     echo "A->B.enabled = true"                                                                                >> ansibleconf.tf
     echo "A->B.topics = .*"                                                                                   >> ansibleconf.tf
     echo "A->B.groups = .*"                                                                                   >> ansibleconf.tf
-    echo "B->A.enabled = true"                                                                                >> ansibleconf.tf
-    echo "B->A.topics = .*"                                                                                   >> ansibleconf.tf
-    echo "B->A.groups = .*"                                                                                   >> ansibleconf.tf
+    echo "#B->A.enabled = true"                                                                                >> ansibleconf.tf
+    echo "#B->A.topics = .*"                                                                                   >> ansibleconf.tf
+    echo "#B->A.groups = .*"                                                                                   >> ansibleconf.tf
     echo "# Setting replication factor of newly created remote topics"                                        >> ansibleconf.tf
     echo "replication.factor=2"                                                                               >> ansibleconf.tf
     echo "############################# Internal Topic Settings  #############################"               >> ansibleconf.tf

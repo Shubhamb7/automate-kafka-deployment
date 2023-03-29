@@ -54,6 +54,14 @@ output "provectus_public_ips" {
   value = aws_instance.ec2provectus.*.public_ip
 }
 
+output "prometheus_private_ips" {
+  value = aws_instance.ec2prometheus.*.private_ip
+}
+
+output "prometheus_public_ips" {
+  value = aws_instance.ec2prometheus.*.public_ip
+}
+
 output "ansible_public_ip" {
   value = aws_instance.ansible.public_ip
 }

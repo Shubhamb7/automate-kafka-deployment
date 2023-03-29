@@ -50,6 +50,14 @@ variable "provectus_ui_configuration" {
   type = map(any)
 }
 
+variable "prometheus_configuration" {
+  type = map(any)
+}
+
+variable "grafana_configuration" {
+  type = map(any)
+}
+
 variable "keypair" {
   type = string
 }
