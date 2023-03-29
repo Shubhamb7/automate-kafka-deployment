@@ -11,4 +11,4 @@ Mirror Maker for data replication accross region
 
 Linked in Cruise Control or Provectus Kafka UI for User Interface
 
-
+Prometheus and Grafana for monitoring
