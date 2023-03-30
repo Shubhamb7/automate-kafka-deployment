@@ -10,8 +10,13 @@ ${ip}
 ${ip}
 %{ endfor ~}
  
-[provectus]
-%{ for ip in aws_instance.ec2provectus.*.private_ip ~}
+[prometheus]
+%{ for ip in aws_instance.ec2prometheus.*.private_ip ~}
+${ip}
+%{ endfor ~}
+ 
+[grafana]
+%{ for ip in aws_instance.ec2grafana.*.private_ip ~}
 ${ip}
 %{ endfor ~}
  

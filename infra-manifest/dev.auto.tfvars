@@ -1,15 +1,15 @@
 profile    = "default"
 env        = "kafka"
-aws_region = "us-west-1"
+aws_region = "us-east-1"
 
-keypair = "kafkacali"
+keypair = "terraform-test"
 userssh = "ubuntu"
 key_path = "~/Downloads/"
 
 vpc_cidr_block = "10.25.0.0/16"
-subnet_availability_zones = ["us-west-1a"]
+subnet_availability_zones = ["us-east-1a"]
 public_subnet_cidr        = ["10.25.1.0/24"]
-private_subnet_cidr        = ["10.25.2.0/24"]
+private_subnet_cidr       = ["10.25.2.0/24"]
 
 kafka_configuration = {
     "kafka_count" = 3,
@@ -41,7 +41,7 @@ connect_configuration = {
     "disk" = 25,
     "subnet" = "public",
     "sg" = "kafkaSG",
-    "s3bucket_name" = "kafka-connect-s3-test-west-1"
+    "s3bucket_name" = "kafka-connect-s3-test-east-1"
 }
 
 schema_configuration = {
@@ -61,15 +61,17 @@ cruise_configuration = {
 }
 
 provectus_ui_configuration = {
-    "provectus_deploy" = "true",
+    "provectus_deploy" = "false",
     "instance_type" = "t2.medium",
     "disk" = 30,
     "subnet" = "public",
     "sg" = "kafkaSG"
 }
 
+# For prometheus and grafana enter count 0 or 1
+
 prometheus_configuration = {
-    "prom_count" = 0,
+    "prom_count" = 1,
     "instance_type" = "t2.large",
     "disk" = 40,
     "subnet" = "public",
@@ -77,7 +79,7 @@ prometheus_configuration = {
 }
 
 grafana_configuration = {
-    "grafana_count" = 0,
+    "grafana_count" = 1,
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",

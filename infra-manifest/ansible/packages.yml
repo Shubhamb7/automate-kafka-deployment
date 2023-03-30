@@ -7,8 +7,8 @@
 #    - connect
 #    - schemareg
 #    - cruise
-#    - prometheus
-#    - grafana
+    - prometheus
+    - grafana
 
 
 

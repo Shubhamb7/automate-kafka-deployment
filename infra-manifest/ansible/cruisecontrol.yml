@@ -21,7 +21,7 @@
       repo: https://github.com/linkedin/cruise-control.git
       dest: /opt/cruise/cruise-control
       single_branch: yes
-      version: 2.5.116
+      version: 2.5.118
   - name: Download Cruise Control UI v0.4.0
     become: true
     get_url:
