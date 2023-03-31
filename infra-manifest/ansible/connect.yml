@@ -3,9 +3,9 @@
   hosts: connect
   remote_user: ubuntu
   vars:
-    kafka_ips: ""
-    bucket_region: ""
-    bucket_name: ""
+    kafka_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:9092') | join(',') }}"
+    bucket_region: "us-west-1"
+    bucket_name: "kafka-connect-s3-test-west-1"
   tasks:
   - name: Create sys log directory
     become: true

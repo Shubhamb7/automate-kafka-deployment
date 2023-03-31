@@ -1,21 +1,8 @@
 #!/bin/bash
 
-sed -i "s/kafka_ips:.*/kafka_ips: \"\"/g" ansible/cruisecontrol.yml
-sed -i "s/kafka_ips:.*/kafka_ips: \"\"/g" ansible/kafka.yml
-sed -i "s/kafka_ips:.*/kafka_ips: \"\"/g" ansible/schema-registry.yml
-sed -i "s/kafka_ips:.*/kafka_ips: \"\"/g" ansible/connect.yml
-sed -i "s/kafka_ips:.*/kafka_ips: \"\"/g" ansible/provectus.yml
-sed -i "s/kafka_ips:.*/kafka_ips: \"\"/g" ansible/prometheus.yml
-sed -i "s/kafka_exporter_ips:.*/kafka_exporter_ips: \"\"/g" ansible/prometheus.yml
-sed -i "s/connect_ips:.*/connect_ips: \"\"/g" ansible/provectus.yml
-sed -i "s/connect_ips:.*/connect_ips: \"\"/g" ansible/prometheus.yml
 sed -i "s/bucket_region:.*/bucket_region: \"\"/g" ansible/connect.yml
 sed -i "s/bucket_name:.*/bucket_name: \"\"/g" ansible/connect.yml
-sed -i "s/zoo_ips:.*/zoo_ips: \"\"/g" ansible/cruisecontrol.yml
-sed -i "s/zoo_ips:.*/zoo_ips: \"\"/g" ansible/kafka.yml
-sed -i "s/zoo_ips:.*/zoo_ips: \"\"/g" ansible/provectus.yml
-sed -i "s/zoo_ips:.*/zoo_ips: \"\"/g" ansible/prometheus.yml
-sed -i "s/mm_ips:.*/mm_ips: \"\"/g" ansible/prometheus.yml
+
 
 sed -i "39,46s/^#//" ansible/kafka.yml
 sed -i "63,64s/^#//" ansible/packages.yml

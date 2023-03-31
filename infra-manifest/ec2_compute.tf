@@ -203,7 +203,7 @@ sudo hostnamectl set-hostname kafka-ui
 }
 
 resource "aws_instance" "ec2prometheus" {
-  count                  = var.prometheus_configuration["prom_count"]
+  count                  = var.prometheus_configuration["prom_count"] > 0 ? 1 : 0
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.prometheus_configuration["instance_type"]
   subnet_id              = var.prometheus_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
@@ -229,7 +229,7 @@ EOF
 }
 
 resource "aws_instance" "ec2grafana" {
-  count                  = var.grafana_configuration["grafana_count"]
+  count                  = var.prometheus_configuration["prom_count"] > 0 ? 1 : 0
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.grafana_configuration["instance_type"]
   subnet_id              = var.grafana_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id

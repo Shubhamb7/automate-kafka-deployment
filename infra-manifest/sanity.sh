@@ -17,38 +17,15 @@ GRAFANA=$(cat dev.auto.tfvars | grep grafana_count | awk '{print substr($3, 1, l
 
 DISK=$(cat dev.auto.tfvars | grep disk | head -n 1 | awk -F= '{print substr($2,1,length($2)-1)}')
 
+if [ $PROMETHEUS -gt 0 ]
+then
+    GRAFANA=1
+else
+    GRAFANA=0
+fi
+
 echo zoo=$ZOO kafka=$KAFKA mm=$MM connect=$CONN schema=$SCHEMA 
 echo prometheus=$PROMETHEUS grafana=$GRAFANA cruise=$CRUISE provectus-kafka-ui=$PROVECTUS
-
-ZOO_IPS=""
-KAFKA_IPS=""
-CONN_IPS=""
-CONN_PROMETHEUS_IPS=""
-KAFKA_PROMETHEUS_IPS=""
-KAFKA_EXP_PROMETHEUS_IPS=""
-ZOO_PROMETHEUS_IPS=""
-MM_PROMETHEUS_IPS=""
-PUBLIC_KAFKA_IPS=""
-
-for((i=0;i<$ZOO;i++))
-do
-    if [ "$ZOO" == "$((i+1))" ]
-    then
-        ZOO_IPS=$ZOO_IPS"{{hostvars[groups['zoo'][$i]]['inventory_hostname']}}:2181"
-    else
-        ZOO_IPS=$ZOO_IPS"{{hostvars[groups['zoo'][$i]]['inventory_hostname']}}:2181,"
-    fi
-done
-
-for((i=0;i<$KAFKA;i++))
-do
-    if [ "$KAFKA" == "$((i+1))" ]
-    then
-        KAFKA_IPS=$KAFKA_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:9092"
-    else
-        KAFKA_IPS=$KAFKA_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:9092,"
-    fi
-done
 
 if [ $CRUISE == "false" ]
 then
@@ -57,37 +34,15 @@ then
     sed -i "141s/^/#/" ansible/server.properties.j2
     sed -i "41s/^/#/" deployment.tf
     sed -i "35,45s/^/#/" ansible/service-start.yml
-else
-    sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/cruisecontrol.yml
-    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/cruisecontrol.yml
 fi
 
 if [ $PROVECTUS == "false" ]
 then
     sed -i "43s/^/#/" deployment.tf
-else
-    if [ $CONN -gt 0 ]
-    then
-        for((i=0;i<$CONN;i++))
-        do
-            if [ "$CONN" == "$((i+1))" ]
-            then
-                CONN_IPS=$CONN_IPS"http:\/\/{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:8083"
-            else
-                CONN_IPS=$CONN_IPS"http:\/\/{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:8083,"
-            fi
-        done
-
-        sed -i "s/connect_ips: \"\"/connect_ips: \"$CONN_IPS\"/g" ansible/provectus.yml
-    fi
-    sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/provectus.yml
-    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/provectus.yml
 fi
 
 if [ $SCHEMA -gt 0 ]
 then
-    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/schema-registry.yml
-else
     sed -i "8s/^/#/" ansible/packages.yml
     sed -i "39s/^/#/" deployment.tf
     sed -i "24,34s/^/#/" ansible/service-start.yml
@@ -97,7 +52,6 @@ if [ $CONN -gt 0 ]
 then
     REGION=$(cat dev.auto.tfvars | grep aws_region | awk '{print substr($3, 2, length($3)-2)}')
     S3NAME=$(cat dev.auto.tfvars | grep s3bucket_name | awk '{print substr($3, 2, length($3)-2)}')
-    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/connect.yml
     sed -i "s/bucket_region: \"\"/bucket_region: \"$REGION\"/g" ansible/connect.yml
     sed -i "s/bucket_name: \"\"/bucket_name: \"$S3NAME\"/g" ansible/connect.yml
 else
@@ -123,78 +77,19 @@ fi
 
 if [ $PROMETHEUS -gt 0 ]
 then
-    for((i=0;i<$KAFKA;i++))
-    do
-        if [ "$KAFKA" == "$((i+1))" ]
-        then
-            KAFKA_PROMETHEUS_IPS=$KAFKA_PROMETHEUS_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:7071"
-        else
-            KAFKA_PROMETHEUS_IPS=$KAFKA_PROMETHEUS_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:7071,"
-        fi
-    done
-
-    for((i=0;i<$KAFKA;i++))
-    do
-        if [ "$KAFKA" == "$((i+1))" ]
-        then
-            KAFKA_EXP_PROMETHEUS_IPS=$KAFKA_EXP_PROMETHEUS_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:9308"
-        else
-            KAFKA_EXP_PROMETHEUS_IPS=$KAFKA_EXP_PROMETHEUS_IPS"{{hostvars[groups['kafka'][$i]]['inventory_hostname']}}:9308,"
-        fi
-    done
-    
-    for((i=0;i<$ZOO;i++))
-    do
-        if [ "$ZOO" == "$((i+1))" ]
-        then
-            ZOO_PROMETHEUS_IPS=$ZOO_PROMETHEUS_IPS"{{hostvars[groups['zoo'][$i]]['inventory_hostname']}}:7071"
-        else
-            ZOO_PROMETHEUS_IPS=$ZOO_PROMETHEUS_IPS"{{hostvars[groups['zoo'][$i]]['inventory_hostname']}}:7071,"
-        fi
-    done
-
-    if [ $CONN -gt 0 ]
+    if [ $CONN -lt 0 ]
     then
-        for((i=0;i<$CONN;i++))
-        do
-            if [ "$CONN" == "$((i+1))" ]
-            then
-                CONN_PROMETHEUS_IPS=$CONN_PROMETHEUS_IPS"{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:7071"
-            else
-                CONN_PROMETHEUS_IPS=$CONN_PROMETHEUS_IPS"{{hostvars[groups['connect'][$i]]['inventory_hostname']}}:7071,"
-            fi
-        done
-    else
         sed -i "34,36s/^/#/" ansible/prometheus-config.yml.j2
     fi
 
-    if [ $MM -gt 0 ]
+    if [ $MM -lt 0 ]
     then
-        for((i=0;i<$MM;i++))
-        do
-            if [ "$MM" == "$((i+1))" ]
-            then
-                MM_PROMETHEUS_IPS=$MM_PROMETHEUS_IPS"{{hostvars[groups['mm'][$i]]['inventory_hostname']}}:7071"
-            else
-                MM_PROMETHEUS_IPS=$MM_PROMETHEUS_IPS"{{hostvars[groups['mm'][$i]]['inventory_hostname']}}:7071,"
-            fi
-        done
-    else
         sed -i "37,39s/^/#/" ansible/prometheus-config.yml.j2
     fi
-
-    sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
-    sed -i "s/kafka_exporter_ips: \"\"/kafka_exporter_ips: \"$KAFKA_EXP_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
-    sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
-    sed -i "s/connect_ips: \"\"/connect_ips: \"$CONN_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
-    sed -i "s/mm_ips: \"\"/mm_ips: \"$MM_PROMETHEUS_IPS\"/g" ansible/prometheus.yml
 else
     sed -i "10s/^/#/" ansible/packages.yml
     sed -i "44s/^/#/" deployment.tf
 fi
-
-sed -i "s/zoo_ips: \"\"/zoo_ips: \"$ZOO_IPS\"/g" ansible/kafka.yml
-sed -i "s/kafka_ips: \"\"/kafka_ips: \"$KAFKA_IPS\"/g" ansible/kafka.yml
 
 #########################################################################################################
 #########                      ZOOKEEPER PROPERTIES FILE                                     ############

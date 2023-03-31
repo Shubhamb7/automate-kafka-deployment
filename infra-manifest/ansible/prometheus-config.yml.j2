@@ -31,10 +31,10 @@ scrape_configs:
   - job_name: "zookeeper"
     static_configs:
       - targets: [{{ zoo_ips }}]
-#  - job_name: "connect"
-#    static_configs:
-#      - targets: [{{ connect_ips }}]
-#  - job_name: "mirror-maker"
-#    static_configs:
-#      - targets: [{{ mm_ips }}]
+  - job_name: "connect"
+    static_configs:
+      - targets: [{{ connect_ips }}]
+  - job_name: "mirror-maker"
+    static_configs:
+      - targets: [{{ mm_ips }}]
                                                        

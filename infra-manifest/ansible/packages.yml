@@ -4,7 +4,7 @@
     - kafka
     - zoo
 #    - mm 
-#    - connect
+    - connect
 #    - schemareg
 #    - cruise
     - prometheus
@@ -61,7 +61,7 @@
     - kafka
     - zoo
 #    - mm
-#    - connect
+    - connect
   remote_user: ubuntu
   tasks:
     - name: Download Kafka

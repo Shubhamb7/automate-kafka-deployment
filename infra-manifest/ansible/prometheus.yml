@@ -3,11 +3,11 @@
   hosts: prometheus
   remote_user: ubuntu
   vars:
-    kafka_ips: "{{hostvars[groups['kafka'][0]]['inventory_hostname']}}:7071,{{hostvars[groups['kafka'][1]]['inventory_hostname']}}:7071,{{hostvars[groups['kafka'][2]]['inventory_hostname']}}:7071"
-    zoo_ips: "{{hostvars[groups['zoo'][0]]['inventory_hostname']}}:7071,{{hostvars[groups['zoo'][1]]['inventory_hostname']}}:7071,{{hostvars[groups['zoo'][2]]['inventory_hostname']}}:7071"
-    connect_ips: ""
-    mm_ips: ""
-    kafka_exporter_ips: "{{hostvars[groups['kafka'][0]]['inventory_hostname']}}:9308,{{hostvars[groups['kafka'][1]]['inventory_hostname']}}:9308,{{hostvars[groups['kafka'][2]]['inventory_hostname']}}:9308"
+    kafka_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+    zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+    connect_ips: "{{ groups['connect'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+    mm_ips: "{{ groups['mm'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+    kafka_exporter_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:9308') | join(',') }}"
   tasks:
     - name: Download prometheus tar
       become: true

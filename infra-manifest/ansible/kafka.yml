@@ -6,7 +6,7 @@
     data_dir: /opt/kafkadata/kafka-logs
     broker_id: "{{ansible_hostname | regex_replace('.*(.)$', '\\1')}}"
     private_ip: "{{ hostvars[ inventory_hostname ]['ansible_default_ipv4']['address'] }}"
-    zoo_ips: "{{hostvars[groups['zoo'][0]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][1]]['inventory_hostname']}}:2181,{{hostvars[groups['zoo'][2]]['inventory_hostname']}}:2181"
+    zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:2181') | join(',') }}"
 
   tasks:
   - name: Create sys log directory
