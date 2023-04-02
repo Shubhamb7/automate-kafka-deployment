@@ -4,10 +4,12 @@
   remote_user: ubuntu
   vars:
     data_dir: /opt/zookeeperdata/
-    zookeeper1_ip:  "{{ hostvars[groups['zoo'][0]]['inventory_hostname'] }}"
-    zookeeper2_ip:  "{{ hostvars[groups['zoo'][1]]['inventory_hostname'] }}"
-    zookeeper3_ip:  "{{ hostvars[groups['zoo'][2]]['inventory_hostname'] }}"
+    host_num: "{{ groups['zoo'] | length | int}}"
   tasks:
+  - name: vars
+    set_fact:
+      "zookeeper{{ item + 1  }}_ip": "{{ hostvars[groups['zoo'][item]]['inventory_hostname'] }}"
+    loop: "{{ range(0,host_num | int) | list }}"
   - name: Create data directory
     become: true
     file:

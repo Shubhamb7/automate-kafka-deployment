@@ -41,7 +41,7 @@ then
     sed -i "43s/^/#/" deployment.tf
 fi
 
-if [ $SCHEMA -gt 0 ]
+if [ $SCHEMA == 0 ]
 then
     sed -i "8s/^/#/" ansible/packages.yml
     sed -i "39s/^/#/" deployment.tf
@@ -90,120 +90,6 @@ else
     sed -i "10s/^/#/" ansible/packages.yml
     sed -i "44s/^/#/" deployment.tf
 fi
-
-#########################################################################################################
-#########                      ZOOKEEPER PROPERTIES FILE                                     ############
-#########################################################################################################
-
-
-echo "# Licensed to the Apache Software Foundation (ASF) under one or more"                             > ansible/zookeeper.properties.j2
-echo "# contributor license agreements.  See the NOTICE file distributed with"                          >> ansible/zookeeper.properties.j2
-echo "# this work for additional information regarding copyright ownership."                            >> ansible/zookeeper.properties.j2
-echo "# The ASF licenses this file to You under the Apache License, Version 2.0"                        >> ansible/zookeeper.properties.j2
-echo "# (the "License"); you may not use this file except in compliance with"                           >> ansible/zookeeper.properties.j2
-echo "# the License.  You may obtain a copy of the License at"                                          >> ansible/zookeeper.properties.j2
-echo "#"                                                                                                >> ansible/zookeeper.properties.j2  
-echo "#    http://www.apache.org/licenses/LICENSE-2.0"                                                  >> ansible/zookeeper.properties.j2
-echo "#"                                                                                                >> ansible/zookeeper.properties.j2
-echo "# Unless required by applicable law or agreed to in writing, software"                            >> ansible/zookeeper.properties.j2
-echo "# distributed under the License is distributed on an "AS IS" BASIS,"                              >> ansible/zookeeper.properties.j2
-echo "# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied."                       >> ansible/zookeeper.properties.j2
-echo "# See the License for the specific language governing permissions and"                            >> ansible/zookeeper.properties.j2
-echo "# limitations under the License."                                                                 >> ansible/zookeeper.properties.j2
-echo "# the directory where the snapshot is stored."                                                    >> ansible/zookeeper.properties.j2
-echo "dataDir={{ data_dir }}"                                                                           >> ansible/zookeeper.properties.j2
-echo "# the port at which the clients will connect"                                                     >> ansible/zookeeper.properties.j2
-echo "clientPort=2181"                                                                                  >> ansible/zookeeper.properties.j2
-echo "# disable the per-ip limit on the number of connections since this is a non-production config"    >> ansible/zookeeper.properties.j2
-echo "maxClientCnxns=60"                                                                                >> ansible/zookeeper.properties.j2
-echo "# Disable the adminserver by default to avoid port conflicts."                                    >> ansible/zookeeper.properties.j2
-echo "# Set the port to something non-conflicting if choosing to enable this"                           >> ansible/zookeeper.properties.j2
-echo "admin.enableServer=false"                                                                         >> ansible/zookeeper.properties.j2
-echo "# admin.serverPort=8080"                                                                          >> ansible/zookeeper.properties.j2
-echo "4lw.commands.whitelist=*"                                                                         >> ansible/zookeeper.properties.j2
-echo "tickTime=2000"                                                                                    >> ansible/zookeeper.properties.j2
-echo "initLimit=5"                                                                                      >> ansible/zookeeper.properties.j2
-echo "syncLimit=2"                                                                                      >> ansible/zookeeper.properties.j2
-
-for (( i=0; i<$ZOO; i++ ))
-do
-  var_value="server.$((i+1))={{ zookeeper$((i+1))_ip }}:2888:3888"
-  echo "$var_value"                                                                                     >> ansible/zookeeper.properties.j2
-done
-
-
-#########################################################################################################
-#########                      ZOOKEEPER YAML FILE                                           ############
-#########################################################################################################
-
-echo "---"                                                                              > ansible/zoo.yml
-echo "- name: Zookeeper configuration"                                                  >> ansible/zoo.yml
-echo "  hosts: zoo"                                                                     >> ansible/zoo.yml
-echo "  remote_user: ubuntu"                                                            >> ansible/zoo.yml
-echo "  vars:"                                                                          >> ansible/zoo.yml
-echo "    data_dir: /opt/zookeeperdata/"                                                >> ansible/zoo.yml
-for (( i=0; i<$ZOO; i++ ))
-do
-  var_name="zookeeper$((i+1))_ip"
-  var_value="\"{{ hostvars[groups['zoo'][$i]]['inventory_hostname'] }}\""
-  echo "    $var_name:  $var_value"                                                     >> ansible/zoo.yml
-done
-echo "  tasks:"                                                                         >> ansible/zoo.yml
-echo "  - name: Create data directory"                                                  >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    file:"                                                                        >> ansible/zoo.yml
-echo "      path: \"{{ data_dir }}\""                                                   >> ansible/zoo.yml
-echo "      state: directory"                                                           >> ansible/zoo.yml
-echo "      mode: '0755'"                                                               >> ansible/zoo.yml
-echo "  - name: Create sys log directory"                                               >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    file:"                                                                        >> ansible/zoo.yml
-echo "      path: \"{{ data_dir }}/systemlogs\""                                        >> ansible/zoo.yml
-echo "      state: directory"                                                           >> ansible/zoo.yml
-echo "      mode: '0755'"                                                               >> ansible/zoo.yml
-echo "  - name: Remove existing zookeeper properties file"                              >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    file:"                                                                        >> ansible/zoo.yml
-echo "      path: /opt/kafka/config/zookeeper.properties"                               >> ansible/zoo.yml
-echo "      state: absent"                                                              >> ansible/zoo.yml
-echo "  - name: Generate zookeeper.properties from template"                            >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    template:"                                                                    >> ansible/zoo.yml
-echo "      src: /opt/ansible-files/zookeeper.properties.j2"                            >> ansible/zoo.yml
-echo "      dest: /opt/kafka/config/zookeeper.properties"                               >> ansible/zoo.yml
-echo "  - name: Upload local zookeeper service file to the servers"                     >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    copy:"                                                                        >> ansible/zoo.yml
-echo "      src: /opt/ansible-files/zookeeper.service"                                  >> ansible/zoo.yml
-echo "      dest: /etc/systemd/system/"                                                 >> ansible/zoo.yml
-echo "      owner: root"                                                                >> ansible/zoo.yml
-echo "      group: root"                                                                >> ansible/zoo.yml
-echo "      mode: 0644"                                                                 >> ansible/zoo.yml
-echo "  - name: Download JMX exporter zookeeper metrics yml file"                       >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    get_url:"                                                                     >> ansible/zoo.yml
-echo "      url: https://raw.githubusercontent.com/prometheus/jmx_exporter/main/example_configs/zookeeper.yaml" >> ansible/zoo.yml
-echo "      dest: /opt/monitoring/zookeeper.yaml"                                       >> ansible/zoo.yml
-echo "      mode: 0440"                                                                 >> ansible/zoo.yml
-echo "  - name: just force systemd to reread configs"                                   >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    systemd:"                                                                     >> ansible/zoo.yml
-echo "      daemon_reload: yes"                                                         >> ansible/zoo.yml
-echo "  - name: Write myid to myid file"                                                >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    shell: \"hostname | rev | cut -c1 > {{ data_dir }}myid\""                     >> ansible/zoo.yml
-echo "  - name: Enable zookeeper service"                                               >> ansible/zoo.yml
-echo "    become: true"                                                                 >> ansible/zoo.yml
-echo "    systemd:"                                                                     >> ansible/zoo.yml
-echo "      name: zookeeper.service"                                                    >> ansible/zoo.yml
-echo "      enabled: true"                                                              >> ansible/zoo.yml
-echo "      masked: no"                                                                 >> ansible/zoo.yml
-echo "  # - name: Start zookeeper service"                                              >> ansible/zoo.yml
-echo "  #   become: true"                                                               >> ansible/zoo.yml
-echo "  #   systemd:"                                                                   >> ansible/zoo.yml
-echo "  #     name: zookeeper.service"                                                  >> ansible/zoo.yml
-echo "  #     state: started"                                                           >> ansible/zoo.yml
-echo "  #     enabled: true"                                                            >> ansible/zoo.yml
 
 #########################################################################################################
 #########                        ANSIBLE CONFIG TERRAFORM FILE                                  #########

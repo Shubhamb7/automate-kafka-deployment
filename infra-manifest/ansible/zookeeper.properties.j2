@@ -26,6 +26,7 @@ admin.enableServer=false
 tickTime=2000
 initLimit=5
 syncLimit=2
-server.1={{ zookeeper1_ip }}:2888:3888
-server.2={{ zookeeper2_ip }}:2888:3888
-server.3={{ zookeeper3_ip }}:2888:3888
+
+{% for i in range(host_num | int) %}
+server.{{ i + 1 }}={{ vars['zookeeper' ~ (i+1) ~ '_ip'] }}:2888:3888
+{% endfor %}
