@@ -6,7 +6,7 @@ WorkingDirectory=/opt/cruise/cruise-control/
 User=root
 Group=root
 Type=simple
-Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
+Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
 ExecStart=/bin/sh -c '/opt/cruise/cruise-control/kafka-cruise-control-start.sh /opt/cruise/cruise-control/config/cruisecontrol.properties > /opt/cruise/syslogs/cruise-control.log 2>&1'
 ExecStop=/opt/cruise/cruise-control/kafka-cruise-control-stop.sh
 Restart=on-abnormal

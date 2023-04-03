@@ -1,13 +1,13 @@
 profile    = "default"
 env        = "kafka"
-aws_region = "us-east-1"
+aws_region = "us-west-1"
 
-keypair = "terraform-test"
+keypair = "kafkacali"
 userssh = "ubuntu"
 key_path = "~/Downloads/"
 
 vpc_cidr_block = "10.25.0.0/16"
-subnet_availability_zones = ["us-east-1a"]
+subnet_availability_zones = ["us-west-1a"]
 public_subnet_cidr        = ["10.25.1.0/24"]
 private_subnet_cidr       = ["10.25.2.0/24"]
 
@@ -41,7 +41,7 @@ connect_configuration = {
     "disk" = 25,
     "subnet" = "public",
     "sg" = "kafkaSG",
-    "s3bucket_name" = "kafka-connect-s3-test-east-1"
+    "s3bucket_name" = "kafka-connect-s3-test-west-1"
 }
 
 schema_configuration = {
@@ -61,7 +61,7 @@ cruise_configuration = {
 }
 
 provectus_ui_configuration = {
-    "provectus_deploy" = "false",
+    "provectus_deploy" = "true",
     "instance_type" = "t2.medium",
     "disk" = 30,
     "subnet" = "public",

@@ -10,6 +10,11 @@ ${ip} id=${i}
 ${ip} id=${i+1}
 %{ endfor ~}
  
+[provectus]
+%{ for ip in aws_instance.ec2provectus.*.private_ip ~}
+${ip}
+%{ endfor ~}
+ 
   EOT
   filename = "./ansible/hosts"
 }
