@@ -34,10 +34,10 @@ resource "aws_instance" "ec2broker" {
 
   user_data = <<EOF
 #!/bin/bash
-sudo hostnamectl set-hostname kafka-broker${count.index}
+sudo hostnamectl set-hostname kafka-broker${count.index + 1}
   EOF
   tags = {
-    Name = "kafka${count.index}"
+    Name = "kafka${count.index + 1}"
   }
 }
 
