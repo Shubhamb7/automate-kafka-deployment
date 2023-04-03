@@ -1,18 +1,6 @@
 ---
 - name: Global Packages
-  hosts:
-    - kafka
-    - zoo
-#    - mm 
-#    - connect
-#    - schemareg
-#    - cruise
-#    - prometheus
-#    - grafana
-
-
-
-    
+  hosts: all
   remote_user: ubuntu
   tasks:
     - name: Update apt repo and cache
@@ -26,24 +14,16 @@
       apt:
         upgrade: dist
         force_apt_get: yes
-    - name: Install openjdk 11
+    - name: Install extra software packages
       become: true
       apt:
-        name: openjdk-11-jdk
+        name: "{{ item }}"
         state: present
         update_cache: yes
-    - name: Install unzip
-      become: true
-      apt:
-        name: unzip
-        state: present
-        update_cache: yes
-    - name: Install net-tools
-      become: true
-      apt:
-        name: net-tools
-        state: present
-        update_cache: yes
+      loop:
+        - openjdk-17-jdk
+        - unzip
+        - net-tools
     - name: Create monitoring directory
       become: true
       file:

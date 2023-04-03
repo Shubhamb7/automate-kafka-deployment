@@ -29,7 +29,6 @@ echo prometheus=$PROMETHEUS grafana=$GRAFANA cruise=$CRUISE provectus-kafka-ui=$
 
 if [ $CRUISE == "false" ]
 then
-    sed -i "9s/^/#/" ansible/packages.yml
     sed -i "39,46s/^/#/" ansible/kafka.yml
     sed -i "141s/^/#/" ansible/server.properties.j2
     sed -i "41s/^/#/" deployment.tf
@@ -43,7 +42,6 @@ fi
 
 if [ $SCHEMA == 0 ]
 then
-    sed -i "8s/^/#/" ansible/packages.yml
     sed -i "39s/^/#/" deployment.tf
     sed -i "24,34s/^/#/" ansible/service-start.yml
 fi
@@ -56,23 +54,20 @@ then
     sed -i "s/bucket_name: \"\"/bucket_name: \"$S3NAME\"/g" ansible/connect.yml
 else
     sed -i "46,56s/^/#/" ansible/service-start.yml
-    sed -i "64s/^/#/" ansible/packages.yml
-    sed -i "7s/^/#/" ansible/packages.yml
+    sed -i "44s/^/#/" ansible/packages.yml
     sed -i "42s/^/#/" deployment.tf
     sed -i "14,16s/^/#/" ansible/provectus-app.yml.j2
 fi
 
 if [ $MM == 0 ]
 then
-    sed -i "63s/^/#/" ansible/packages.yml
-    sed -i "6s/^/#/" ansible/packages.yml
+    sed -i "43s/^/#/" ansible/packages.yml
     sed -i "40s/^/#/" deployment.tf
 fi
 
 if [ $GRAFANA == 0 ]
 then
     sed -i "45s/^/#/" deployment.tf
-    sed -i "11s/^/#/" ansible/packages.yml
 fi
 
 if [ $PROMETHEUS -gt 0 ]
@@ -87,7 +82,6 @@ then
         sed -i "37,39s/^/#/" ansible/prometheus-config.yml.j2
     fi
 else
-    sed -i "10s/^/#/" ansible/packages.yml
     sed -i "44s/^/#/" deployment.tf
 fi
 
@@ -98,13 +92,13 @@ fi
 echo "resource \"local_file\" \"ansible_hosts\" {"                                                        > ansibleconf.tf
 echo "  content  = <<EOT"                                                                                 >> ansibleconf.tf
 echo "[kafka]"                                                                                            >> ansibleconf.tf
-echo "%{ for ip in aws_instance.ec2broker.*.private_ip ~}"                                                >> ansibleconf.tf
-echo "\${ip}"                                                                                             >> ansibleconf.tf
+echo "%{ for i,ip in aws_instance.ec2broker.*.private_ip ~}"                                              >> ansibleconf.tf
+echo "\${ip} id=\${i}"                                                                                    >> ansibleconf.tf
 echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
 echo " "                                                                                                  >> ansibleconf.tf
 echo "[zoo]"                                                                                              >> ansibleconf.tf
-echo "%{ for ip in aws_instance.ec2zoo.*.private_ip ~}"                                                   >> ansibleconf.tf
-echo "\${ip}"                                                                                             >> ansibleconf.tf
+echo "%{ for i,ip in aws_instance.ec2zoo.*.private_ip ~}"                                                 >> ansibleconf.tf
+echo "\${ip} id=\${i+1}"                                                                                  >> ansibleconf.tf
 echo "%{ endfor ~}"                                                                                       >> ansibleconf.tf
 echo " "                                                                                                  >> ansibleconf.tf
 

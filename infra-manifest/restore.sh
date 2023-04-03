@@ -5,8 +5,7 @@ sed -i "s/bucket_name:.*/bucket_name: \"\"/g" ansible/connect.yml
 
 
 sed -i "39,46s/^#//" ansible/kafka.yml
-sed -i "63,64s/^#//" ansible/packages.yml
-sed -i "4,15s/^#//" ansible/packages.yml
+sed -i "43,44s/^#//" ansible/packages.yml
 sed -i "24,56s/^#//" ansible/service-start.yml
 sed -i "141s/^#//" ansible/server.properties.j2
 sed -i "39,45s/^#//" deployment.tf

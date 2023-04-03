@@ -4,7 +4,7 @@
   remote_user: ubuntu
   vars:
     data_dir: /opt/kafkadata/kafka-logs
-    broker_id: "{{ansible_hostname | regex_replace('.*(.)$', '\\1')}}"
+    broker_id: "{{ hostvars[inventory_hostname]['id'] }}"
     private_ip: "{{ hostvars[ inventory_hostname ]['ansible_default_ipv4']['address'] }}"
     zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:2181') | join(',') }}"
 

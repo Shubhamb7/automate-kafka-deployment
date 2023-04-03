@@ -52,7 +52,7 @@
       daemon_reload: yes
   - name: Write myid to myid file
     become: true
-    shell: "hostname | rev | cut -c1 > {{ data_dir }}myid"
+    shell: "echo {{ hostvars[inventory_hostname]['id'] }} > {{ data_dir }}myid"
   - name: Enable zookeeper service
     become: true
     systemd:

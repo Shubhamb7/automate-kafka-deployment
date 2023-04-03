@@ -8,47 +8,6 @@
     zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:2181') | join(',') }}"
     connect_ips: "{{ groups['connect'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', 'http://\\1:8083') | join(',') }}"
   tasks:
-    - name: Update apt repo and cache
-      become: true
-      apt:
-        update_cache: yes
-        force_apt_get: yes
-        cache_valid_time: 3600
-    - name: Upgrade all packages
-      become: true
-      apt:
-        upgrade: dist
-        force_apt_get: yes
-    - name: Install openjdk 17
-      become: true
-      apt:
-        name: openjdk-17-jdk
-        state: present
-        update_cache: yes
-    - name: Install unzip
-      become: true
-      apt:
-        name: unzip
-        state: present
-        update_cache: yes
-    - name: Install net-tools
-      become: true
-      apt:
-        name: net-tools
-        state: present
-        update_cache: yes
-    - name: Create monitoring directory
-      become: true
-      file:
-        path: "/opt/monitoring"
-        state: directory
-        mode: '0755'
-    - name: Download JMX exporter
-      become: true
-      get_url:
-        url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.18.0/jmx_prometheus_javaagent-0.18.0.jar
-        dest: /opt/monitoring/jmx_prometheus_javaagent-0.18.0.jar
-        mode: 0440
     - name: Create provectus directory
       become: true
       file:

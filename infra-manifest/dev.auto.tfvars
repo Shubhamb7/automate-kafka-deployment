@@ -61,7 +61,7 @@ cruise_configuration = {
 }
 
 provectus_ui_configuration = {
-    "provectus_deploy" = "true",
+    "provectus_deploy" = "false",
     "instance_type" = "t2.medium",
     "disk" = 30,
     "subnet" = "public",
