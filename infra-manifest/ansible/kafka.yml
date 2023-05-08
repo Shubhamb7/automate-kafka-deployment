@@ -15,6 +15,12 @@
       path: "/opt/kafkadata/systemlogs"
       state: directory
       mode: '0755'
+  - name: Create app log directory
+    become: true
+    file:
+      path: "/opt/kafkadata/applogs"
+      state: directory
+      mode: '0755'
   - name: Get public ip for advertiser
     command: curl --silent --fail http://ifconfig.me/ip
     register: public_ip
