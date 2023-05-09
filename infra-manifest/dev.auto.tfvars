@@ -84,3 +84,4 @@ grafana_configuration = {
     "subnet" = "public",
     "sg" = "kafkaSG"
 }
+
