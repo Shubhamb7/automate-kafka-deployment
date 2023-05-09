@@ -29,7 +29,7 @@ echo prometheus=$PROMETHEUS grafana=$GRAFANA cruise=$CRUISE provectus-kafka-ui=$
 
 if [ $CRUISE == "false" ]
 then
-    sed -i "39,46s/^/#/" ansible/kafka.yml
+    sed -i "45,52s/^/#/" ansible/kafka.yml
     sed -i "141s/^/#/" ansible/server.properties.j2
     sed -i "41s/^/#/" deployment.tf
     sed -i "35,45s/^/#/" ansible/service-start.yml

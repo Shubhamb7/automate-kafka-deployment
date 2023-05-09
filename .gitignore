@@ -1,0 +1,6 @@
+backend-manifest/.terraform
+backend-manifest/.terraform.lock.hcl
+backend-manifest/terraform.tfstate
+backend-manifest/terraform.tfstate.backup
+infra-manifest/.terraform
+infra-manifest/.terraform.lock.hcl
