@@ -28,7 +28,7 @@ zoo_configuration = {
 }
 
 mm_configuration = {
-    "mm_count" = 2,
+    "mm_count" = 0,
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",

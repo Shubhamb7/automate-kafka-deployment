@@ -44,12 +44,12 @@
       mode: 0644
 #  - name: Upload cruise control metrics exporter to the servers
 #    become: true
-###   copy:
-###     src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
-###     dest: /opt/kafka/libs/
-###     owner: root
-###     group: root
-###     mode: 0644
+# copy:
+#   src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
+#   dest: /opt/kafka/libs/
+#   owner: root
+#   group: root
+#   mode: 0644
   - name: Upload JMX exporter kafka metrics yml file
     become: true
     copy:
