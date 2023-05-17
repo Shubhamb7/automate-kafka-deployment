@@ -6,7 +6,7 @@
   - name: Create sys log directory
     become: true
     file:
-      path: "/opt/mm/systemlogs"
+      path: "/opt/mm/applogs"
       state: directory
       mode: '0755'
   - name: Remove existing mirror maker properties file
