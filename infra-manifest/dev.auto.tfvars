@@ -28,7 +28,7 @@ zoo_configuration = {
 }
 
 mm_configuration = {
-    "mm_count" = 0,
+    "mm_count" = 1,
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",
@@ -36,7 +36,7 @@ mm_configuration = {
 }
 
 connect_configuration = {
-    "connect_count" = 0,
+    "connect_count" = 1,
     "instance_type" = "t2.medium",
     "disk" = 25,
     "subnet" = "public",
@@ -61,7 +61,7 @@ cruise_configuration = {
 }
 
 provectus_ui_configuration = {
-    "provectus_deploy" = "false",
+    "provectus_deploy" = "true",
     "instance_type" = "t2.medium",
     "disk" = 30,
     "subnet" = "public",
@@ -71,7 +71,7 @@ provectus_ui_configuration = {
 # For prometheus enter count 0 or 1
 
 prometheus_configuration = {
-    "prom_count" = 0,
+    "prom_count" = 1,
     "instance_type" = "t2.large",
     "disk" = 40,
     "subnet" = "public",

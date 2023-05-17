@@ -40,8 +40,8 @@
   hosts: 
     - kafka
     - zoo
-#    - mm
-#    - connect
+    - mm
+    - connect
   remote_user: ubuntu
   tasks:
     - name: Download Kafka
