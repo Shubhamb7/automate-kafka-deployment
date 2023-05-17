@@ -6,8 +6,10 @@ User=root
 Group=root
 Type=simple
 Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+Environment="LOG_DIR=/opt/connect/applogs"
+Environment="KAFKA_HEAP_OPTS=-Xmx2G -Xms2G"
 Environment="KAFKA_OPTS=-javaagent:/opt/monitoring/jmx_prometheus_javaagent-0.18.0.jar=7071:/opt/monitoring/connect-jmx.yml"
-ExecStart=/bin/sh -c '/opt/kafka/bin/connect-standalone.sh /opt/kafka/config/connect-standalone.properties /opt/kafka/config/connect-s3-sink.properties > /opt/connect/systemlogs/connect.log 2>&1'
+ExecStart=/bin/sh -c '/opt/kafka/bin/connect-standalone.sh /opt/kafka/config/connect-standalone.properties /opt/kafka/config/connect-s3-sink.properties'
 Restart=on-abnormal
 [Install]
 WantedBy=multi-user.target
