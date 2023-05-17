@@ -16,13 +16,7 @@
       path: "{{ data_dir }}"
       state: directory
       mode: '0755'
-  - name: Create sys log directory
-    become: true
-    file:
-      path: "{{ data_dir }}/systemlogs"
-      state: directory
-      mode: '0755'
-  - name: Create sys log directory
+  - name: Create app log directory
     become: true
     file:
       path: "{{ data_dir }}/applogs"
