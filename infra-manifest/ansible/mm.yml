@@ -46,6 +46,8 @@
       name: mm.service
       enabled: true
       masked: no
+  - name: Log Rotation
+    shell: (crontab -l ; echo '30 2 * * * find /opt/mm/applogs/ -name "connect.log*" ! -name "connect.log" -type f -mtime +7 -exec rm {} \;') | crontab -
   # # - name: Start kafka service
   #   become: true
   #   systemd:

@@ -64,3 +64,16 @@
       file:
         path: /opt/kafka_2.13-3.3.1.tgz
         state: absent
+    - name: Remove log4j file
+      become: true
+      file:
+        path: /opt/kafka/config/log4j.properties
+        state: absent
+    - name: Upload local log4j file to the servers
+      become: true
+      copy:
+        src: /opt/ansible-files/log4j.properties
+        dest: /opt/kafka/config/
+        owner: root
+        group: root
+        mode: 0644

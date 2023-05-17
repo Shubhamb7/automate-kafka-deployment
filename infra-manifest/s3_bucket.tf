@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "connect_s3bucket" {
 resource "aws_s3_bucket_public_access_block" "connect_s3bucket_public_access" {
   count = length(aws_s3_bucket.connect_s3bucket)
   bucket = aws_s3_bucket.connect_s3bucket[0].id
-
+  depends_on = [ aws_s3_bucket.connect_s3bucket ]
   block_public_acls       = false
   block_public_policy     = false
   ignore_public_acls      = false
@@ -21,7 +21,7 @@ resource "aws_s3_bucket_public_access_block" "connect_s3bucket_public_access" {
 resource "aws_s3_bucket_policy" "connect_s3bucket_policy" {
   count = length(aws_s3_bucket.connect_s3bucket)
   bucket = aws_s3_bucket.connect_s3bucket[0].id
-
+  depends_on = [ aws_s3_bucket_public_access_block.connect_s3bucket_public_access ]
   policy = <<EOF
 {
    "Version": "2012-10-17",

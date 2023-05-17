@@ -4,3 +4,7 @@ backend-manifest/terraform.tfstate
 backend-manifest/terraform.tfstate.backup
 infra-manifest/.terraform
 infra-manifest/.terraform.lock.hcl
+infra-manifest/ansible/connect-mirror-maker.properties
+infra-manifest/ansible/hosts
+infra-manifest/commands.txt
+infra-manifest/errored.tfstate

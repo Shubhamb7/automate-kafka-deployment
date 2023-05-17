@@ -22,7 +22,6 @@ resource "aws_instance" "ec2broker" {
   subnet_id              = var.kafka_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
   vpc_security_group_ids = [aws_security_group.sg.id]
   key_name               = var.keypair
-  depends_on             = [aws_instance.ec2zoo]
   iam_instance_profile   = "SSMforEC2"
 
   root_block_device {
