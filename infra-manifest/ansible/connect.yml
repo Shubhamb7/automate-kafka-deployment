@@ -10,7 +10,7 @@
   - name: Create sys log directory
     become: true
     file:
-      path: "/opt/connect/systemlogs"
+      path: "/opt/connect/applogs"
       state: directory
       mode: '0755'
   - name: Create plugin directory
