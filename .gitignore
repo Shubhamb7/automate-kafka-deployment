@@ -8,3 +8,4 @@ infra-manifest/ansible/connect-mirror-maker.properties
 infra-manifest/ansible/hosts
 infra-manifest/commands.txt
 infra-manifest/errored.tfstate
+.vscode
