@@ -4,13 +4,19 @@
   remote_user: ubuntu
   vars:
     kafka_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:9092') | join(',') }}"
-    bucket_region: "us-east-1"
-    bucket_name: "kafka-connect-s3-test-east-1"
+    bucket_region: "us-west-1"
+    bucket_name: "kafka-connect-s3-test-west-1"
   tasks:
   - name: Create sys log directory
     become: true
     file:
-      path: "/opt/connect/applogs"
+      path: "/opt/connect/syslogs"
+      state: directory
+      mode: '0755'
+  - name: Create log4j log directory
+    become: true
+    file:
+      path: "/opt/connect/log4jlogs"
       state: directory
       mode: '0755'
   - name: Create plugin directory
@@ -32,6 +38,34 @@
     unarchive:
       src: /tmp/confluentinc-kafka-connect-s3-10.4.2.zip
       dest: /opt/connect/plugin/
+      remote_src: yes
+  - name: Upload debezium mysql connector tar to the server
+    become: true
+    copy:
+      src: /opt/ansible-files/debezium-connector-mysql-2.2.1.Final-plugin.tar.gz
+      dest: /tmp/
+      owner: root
+      group: root
+      mode: 0644
+  - name: Extract the debezium mysql connector tar
+    become: true
+    unarchive:
+      src: /tmp/debezium-connector-mysql-2.2.1.Final-plugin.tar.gz
+      dest: /opt/connect/plugin/
+      remote_src: yes
+  - name: Upload apicurio distro connect converter tar to the server
+    become: true
+    copy:
+      src: /opt/ansible-files/apicurio-registry-distro-connect-converter-2.4.1.Final.tar.gz
+      dest: /tmp/
+      owner: root
+      group: root
+      mode: 0644
+  - name: Extract the distro connect converter tar
+    become: true
+    unarchive:
+      src: /tmp/apicurio-registry-distro-connect-converter-2.4.1.Final.tar.gz
+      dest: /opt/connect/plugin/apicurio-registry-distro-connect-converter-2.4.1/
       remote_src: yes
   - name: Remove existing connect properties file
     become: true
@@ -67,7 +101,7 @@
     systemd:
       daemon_reload: yes
   - name: Log Rotation
-    shell: (crontab -l ; echo '30 2 * * * find /opt/connect/applogs/ -name "connect.log*" ! -name "connect.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+    shell: (crontab -l ; echo '30 2 * * * find /opt/connect/log4jlogs/ -name "*.log*" ! -name "*.log" -type f -mtime +1 -exec rm {} \;') | crontab -
   # - name: Enable connect service
   #   become: true
   #   systemd:

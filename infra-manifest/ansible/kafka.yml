@@ -3,16 +3,22 @@
   hosts: kafka
   remote_user: ubuntu
   vars:
-    data_dir: /opt/kafkadata/kafka-logs
+    data_dir: /opt/kafkadata/data
     broker_id: "{{ hostvars[inventory_hostname]['id'] }}"
     private_ip: "{{ hostvars[ inventory_hostname ]['ansible_default_ipv4']['address'] }}"
     zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:2181') | join(',') }}"
 
   tasks:
-  - name: Create app log directory
+  - name: Create sys log directory
     become: true
     file:
-      path: "/opt/kafkadata/applogs"
+      path: "/opt/kafkadata/syslogs"
+      state: directory
+      mode: '0755'
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "/opt/kafkadata/log4jlogs"
       state: directory
       mode: '0755'
   - name: Get public ip for advertiser
@@ -38,12 +44,12 @@
       mode: 0644
 #  - name: Upload cruise control metrics exporter to the servers
 #    become: true
-#    copy:
-#      src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
-#      dest: /opt/kafka/libs/
-#      owner: root
-#      group: root
-#      mode: 0644
+#   copy:
+#     src: /opt/ansible-files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
+#     dest: /opt/kafka/libs/
+#     owner: root
+#     group: root
+#     mode: 0644
   - name: Upload JMX exporter kafka metrics yml file
     become: true
     copy:
@@ -94,7 +100,11 @@
       enabled: true
       masked: no
   - name: Log Rotation
-    shell: (crontab -l ; echo '30 2 * * * find /opt/kafkadata/applogs/ -name "server.log*" ! -name "server.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+    become: true
+    shell: (crontab -l ; echo '30 2 * * * find /opt/kafkadata/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +1 -exec rm {} \;') | crontab -
+  # - name: Log Rotation
+  #   become: true
+  #   shell: (crontab -l ; echo '30 2 * * * find /opt/kafkadata/log4jlogs/ -name "kafkaServer-gc.log*" ! -name "kafkaServer-gc.log" -type f -mtime +7 -exec rm {} \;') | crontab -
   # - name: Start kafka service
   #   become: true
   #   systemd:

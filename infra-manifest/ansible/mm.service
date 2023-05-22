@@ -6,10 +6,10 @@ User=root
 Group=root
 Type=simple
 Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
-Environment="LOG_DIR=/opt/mm/applogs"
+Environment="LOG_DIR=/opt/mm/log4jlogs"
 Environment="KAFKA_HEAP_OPTS=-Xmx2G -Xms2G"
 Environment="KAFKA_OPTS=-javaagent:/opt/monitoring/jmx_prometheus_javaagent-0.18.0.jar=7071:/opt/monitoring/connect-jmx.yml"
-ExecStart=/bin/sh -c '/opt/kafka/bin/connect-mirror-maker.sh /opt/kafka/config/connect-mirror-maker.properties'
+ExecStart=/bin/sh -c '/opt/kafka/bin/connect-mirror-maker.sh /opt/kafka/config/connect-mirror-maker.properties >> /opt/mm/syslogs/mirrormaker.log 2>&1'
 Restart=on-abnormal
 [Install]
 WantedBy=multi-user.target

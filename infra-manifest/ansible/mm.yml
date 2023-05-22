@@ -6,7 +6,13 @@
   - name: Create sys log directory
     become: true
     file:
-      path: "/opt/mm/applogs"
+      path: "/opt/mm/syslogs"
+      state: directory
+      mode: '0755'
+  - name: Create log4j log directory
+    become: true
+    file:
+      path: "/opt/mm/log4jlogs"
       state: directory
       mode: '0755'
   - name: Remove existing mirror maker properties file
@@ -47,7 +53,7 @@
       enabled: true
       masked: no
   - name: Log Rotation
-    shell: (crontab -l ; echo '30 2 * * * find /opt/mm/applogs/ -name "connect.log*" ! -name "connect.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+    shell: (crontab -l ; echo '30 2 * * * find /opt/mm/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +1 -exec rm {} \;') | crontab -
   # # - name: Start kafka service
   #   become: true
   #   systemd:

@@ -16,10 +16,16 @@
       path: "{{ data_dir }}"
       state: directory
       mode: '0755'
-  - name: Create app log directory
+  - name: Create sys log directory
     become: true
     file:
-      path: "{{ data_dir }}/applogs"
+      path: "{{ data_dir }}/syslogs"
+      state: directory
+      mode: '0755'
+  - name: Create sys log directory
+    become: true
+    file:
+      path: "{{ data_dir }}/log4jlogs"
       state: directory
       mode: '0755'
   - name: Remove existing zookeeper properties file
@@ -60,7 +66,11 @@
       enabled: true
       masked: no
   - name: Log Rotation
-    shell: (crontab -l ; echo '30 2 * * * find /opt/zookeeperdata/applogs/ -name "server.log*" ! -name "server.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+    become: true
+    shell: (crontab -l ; echo '30 2 * * * find /opt/zookeeperdata/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +1 -exec rm {} \;') | crontab -
+  # - name: Log Rotation
+  #   become: true
+  #   shell: (crontab -l ; echo '30 2 * * * find /opt/zookeeperdata/log4jlogs/ -name "zookeeper-gc.log*" ! -name "zookeeper-gc.log" -type f -mtime +7 -exec rm {} \;') | crontab -
   # - name: Start zookeeper service
   #   become: true
   #   systemd:
