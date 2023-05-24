@@ -6,6 +6,24 @@
     kafka_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:9092') | join(',') }}"
     zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:2181') | join(',') }}"
   tasks:
+  - name: Create cruise directory
+    become: true
+    file:
+      path: "/opt/cruise"
+      state: directory
+      mode: '0755'
+  - name: format the volume to xfs filesystem
+    become: true
+    shell: mkfs.xfs /dev/xvdf
+  - name: mount the volume to data directory
+    become: true
+    shell: mount /dev/xvdf /opt/cruise/
+  - name: Add entry to fstab
+    become: true
+    shell: echo "/dev/xvdf       /opt/cruise     xfs     defaults        0       0" >> /etc/fstab
+  - name: check fstab
+    become: true
+    shell: mount -a
   - name: Create sys log directory
     become: true
     file:
@@ -105,10 +123,11 @@
       name: cruise.service
       enabled: true
       masked: no
-  
-  # - name: Start kafka service
-  #   become: true
-  #   systemd:
-  #     name: kafka.service
-  #     state: started
-  #     enabled: true
+  - name: Logrotate of cruise
+    become: true
+    copy:
+      src: /opt/ansible-files/logrotate/cruise
+      dest: /etc/logrotate.d/
+      owner: root
+      group: root
+      mode: 0644

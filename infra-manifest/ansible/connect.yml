@@ -7,6 +7,24 @@
     bucket_region: "us-west-1"
     bucket_name: "kafka-connect-s3-test-west-1"
   tasks:
+  - name: Create connect log directory
+    become: true
+    file:
+      path: "/opt/connect"
+      state: directory
+      mode: '0755'
+  - name: format the volume to xfs filesystem
+    become: true
+    shell: mkfs.xfs /dev/xvdf
+  - name: mount the volume to data directory
+    become: true
+    shell: mount /dev/xvdf /opt/connect/
+  - name: Add entry to fstab
+    become: true
+    shell: echo "/dev/xvdf       /opt/connect    xfs     defaults        0       0" >> /etc/fstab
+  - name: check fstab
+    become: true
+    shell: mount -a
   - name: Create sys log directory
     become: true
     file:
@@ -61,6 +79,12 @@
       owner: root
       group: root
       mode: 0644
+  - name: Create apicurio distro connect directory
+    become: true
+    file:
+      path: "/opt/connect/plugin/apicurio-registry-distro-connect-converter-2.4.1/"
+      state: directory
+      mode: '0755'
   - name: Extract the distro connect converter tar
     become: true
     unarchive:
@@ -101,10 +125,13 @@
     systemd:
       daemon_reload: yes
   - name: Log Rotation
-    shell: (crontab -l ; echo '30 2 * * * find /opt/connect/log4jlogs/ -name "*.log*" ! -name "*.log" -type f -mtime +1 -exec rm {} \;') | crontab -
-  # - name: Enable connect service
-  #   become: true
-  #   systemd:
-  #     name: connect.service
-  #     enabled: true
-  #     masked: no
+    become: true
+    shell: (crontab -l ; echo '30 1 * * 0 find /opt/connect/log4jlogs/ -name "*.log*" ! -name "*.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+  - name: Logrotate of connect
+    become: true
+    copy:
+      src: /opt/ansible-files/logrotate/connect
+      dest: /etc/logrotate.d/
+      owner: root
+      group: root
+      mode: 0644

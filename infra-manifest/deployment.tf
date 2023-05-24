@@ -20,7 +20,7 @@ resource "aws_instance" "ansible" {
     host = self.public_dns
   }
   provisioner "local-exec" {
-    command = "scp -i ${var.key_path}${var.keypair}.pem -o StrictHostKeyChecking=no ./ansible/* ubuntu@${self.public_dns}:~/"
+    command = "scp -i ${var.key_path}${var.keypair}.pem -o StrictHostKeyChecking=no -r ./ansible/* ubuntu@${self.public_dns}:~/"
   }
   provisioner "remote-exec" {
     inline = [
@@ -38,11 +38,11 @@ resource "aws_instance" "ansible" {
       "ansible-playbook /opt/ansible-files/kafka.yml --private-key /tmp/${var.keypair}.pem",
       "ansible-playbook /opt/ansible-files/schema-registry.yml --private-key /tmp/${var.keypair}.pem",
 #      "ansible-playbook /opt/ansible-files/mm.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/cruisecontrol.yml --private-key /tmp/${var.keypair}.pem",
+      "ansible-playbook /opt/ansible-files/cruisecontrol.yml --private-key /tmp/${var.keypair}.pem",
       "ansible-playbook /opt/ansible-files/connect.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/provectus.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/prometheus.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/grafana.yml --private-key /tmp/${var.keypair}.pem",
+      "ansible-playbook /opt/ansible-files/provectus.yml --private-key /tmp/${var.keypair}.pem",
+      "ansible-playbook /opt/ansible-files/prometheus.yml --private-key /tmp/${var.keypair}.pem",
+      "ansible-playbook /opt/ansible-files/grafana.yml --private-key /tmp/${var.keypair}.pem",
       "ansible-playbook /opt/ansible-files/service-start.yml --private-key /tmp/${var.keypair}.pem"
     ]
   }

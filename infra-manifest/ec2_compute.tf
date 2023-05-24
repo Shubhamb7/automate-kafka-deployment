@@ -25,7 +25,7 @@ resource "aws_instance" "ec2broker" {
   iam_instance_profile   = "SSMforEC2"
 
   root_block_device {
-    volume_size           = var.kafka_configuration["disk"]
+    volume_size           = var.kafka_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true
@@ -50,7 +50,7 @@ resource "aws_instance" "ec2zoo" {
   iam_instance_profile   = "SSMforEC2"
 
   root_block_device {
-    volume_size           = var.zoo_configuration["disk"]
+    volume_size           = var.zoo_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true
@@ -77,7 +77,7 @@ resource "aws_instance" "ec2connect" {
   depends_on             = [aws_s3_bucket.connect_s3bucket, aws_s3_bucket_public_access_block.connect_s3bucket_public_access, aws_s3_bucket_policy.connect_s3bucket_policy]
   
   root_block_device {
-    volume_size           = var.connect_configuration["disk"]
+    volume_size           = var.connect_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true
@@ -104,7 +104,7 @@ resource "aws_instance" "ec2mm" {
   iam_instance_profile   = "SSMforEC2"
 
   root_block_device {
-    volume_size           = var.mm_configuration["disk"]
+    volume_size           = var.mm_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true
@@ -130,7 +130,7 @@ resource "aws_instance" "ec2schemareg" {
   iam_instance_profile   = "SSMforEC2"
   
   root_block_device {
-    volume_size           = var.schema_configuration["disk"]
+    volume_size           = var.schema_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true
@@ -157,7 +157,7 @@ resource "aws_instance" "ec2cruise" {
   iam_instance_profile   = "SSMforEC2"
   
   root_block_device {
-    volume_size           = var.cruise_configuration["disk"]
+    volume_size           = var.cruise_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true
@@ -184,7 +184,7 @@ resource "aws_instance" "ec2provectus" {
   iam_instance_profile   = "SSMforEC2"
   
   root_block_device {
-    volume_size           = var.provectus_ui_configuration["disk"]
+    volume_size           = var.provectus_ui_configuration["ephemeral"]
     volume_type           = "gp2"
     encrypted             = true
     delete_on_termination = true

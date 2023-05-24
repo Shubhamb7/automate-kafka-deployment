@@ -16,6 +16,18 @@
       path: "{{ data_dir }}"
       state: directory
       mode: '0755'
+  - name: format the volume to xfs filesystem
+    become: true
+    shell: mkfs.xfs /dev/xvdf
+  - name: mount the volume to data directory
+    become: true
+    shell: mount /dev/xvdf /opt/zookeeperdata/
+  - name: Add entry to fstab
+    become: true
+    shell: echo "/dev/xvdf       /opt/zookeeperdata      xfs     defaults        0       0" >> /etc/fstab
+  - name: check fstab
+    become: true
+    shell: mount -a
   - name: Create sys log directory
     become: true
     file:
@@ -67,13 +79,12 @@
       masked: no
   - name: Log Rotation
     become: true
-    shell: (crontab -l ; echo '30 2 * * * find /opt/zookeeperdata/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +1 -exec rm {} \;') | crontab -
-  # - name: Log Rotation
-  #   become: true
-  #   shell: (crontab -l ; echo '30 2 * * * find /opt/zookeeperdata/log4jlogs/ -name "zookeeper-gc.log*" ! -name "zookeeper-gc.log" -type f -mtime +7 -exec rm {} \;') | crontab -
-  # - name: Start zookeeper service
-  #   become: true
-  #   systemd:
-  #     name: zookeeper.service
-  #     state: started
-  #     enabled: true
+    shell: (crontab -l ; echo '30 1 * * 0 find /opt/zookeeperdata/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+  - name: Logrotate for zookeeper
+    become: true
+    copy:
+      src: /opt/ansible-files/logrotate/zookeeper
+      dest: /etc/logrotate.d/
+      owner: root
+      group: root
+      mode: 0644

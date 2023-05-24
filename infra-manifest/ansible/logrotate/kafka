@@ -1,0 +1,11 @@
+/opt/kafkadata/syslogs/kafka.log {
+    rotate 7
+    size 50M
+    daily
+    missingok
+    notifempty
+    dateext
+    compress
+    delaycompress
+    copytruncate
+}

@@ -14,6 +14,18 @@
         path: "/opt/provectus"
         state: directory
         mode: '0755'
+    - name: format the volume to xfs filesystem
+      become: true
+      shell: mkfs.xfs /dev/xvdf
+    - name: mount the volume to data directory
+      become: true
+      shell: mount /dev/xvdf /opt/provectus/
+    - name: Add entry to fstab
+      become: true
+      shell: echo "/dev/xvdf       /opt/provectus  xfs     defaults        0       0" >> /etc/fstab
+    - name: check fstab
+      become: true
+      shell: mount -a
     - name: Download kafka ui jar
       become: true
       get_url:
@@ -45,3 +57,11 @@
         name: provectus.service
         state: started
         enabled: true
+    - name: Logrotate of provectus
+      become: true
+      copy:
+        src: /opt/ansible-files/logrotate/provectus
+        dest: /etc/logrotate.d/
+        owner: root
+        group: root
+        mode: 0644
