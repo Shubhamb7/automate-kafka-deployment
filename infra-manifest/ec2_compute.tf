@@ -252,29 +252,3 @@ EOF
   }
 
 }
-
-resource "aws_instance" "ec2mysqldb" {
-  count                  = var.mysqldb_configuration["mysqldb_deploy"] != "true" ? 0 : 1
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.mysqldb_configuration["instance_type"]
-  subnet_id              = var.mysqldb_configuration["subnet"] != "public" ? aws_subnet.private_subnet[0].id : aws_subnet.public_subnet[0].id
-  vpc_security_group_ids = [aws_security_group.sg.id]
-  key_name               = var.keypair
-  iam_instance_profile   = "SSMforEC2"
-
-  root_block_device {
-    volume_size           = var.mysqldb_configuration["disk"]
-    volume_type           = "gp2"
-    encrypted             = true
-    delete_on_termination = true
-  }
-
-  user_data = <<EOF
-#!/bin/bash
-sudo hostnamectl set-hostname mysql${count.index + 1}
-EOF
-  tags = {
-    Name = "mysql${count.index + 1}"
-  }
-
-}

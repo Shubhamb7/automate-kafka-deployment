@@ -11,9 +11,9 @@ kafka:
     - name: Cluster-01
       bootstrapServers: {{ kafka_ips }}
       zookeeper: {{ zoo_ips }}
-      kafkaConnect:
-        - name: Connect
-          address: {{ connect_ips }}
+#      kafkaConnect:
+#        - name: Connect
+#          address: {{ connect_ips }}
       # schemaRegistry: http://localhost:8085
       # ksqldbServer: http://localhost:8088
       metrics:

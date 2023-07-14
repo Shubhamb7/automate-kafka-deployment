@@ -36,13 +36,13 @@ resource "aws_instance" "ansible" {
       "ansible-playbook /opt/ansible-files/packages.yml --private-key /tmp/${var.keypair}.pem",
       "ansible-playbook /opt/ansible-files/zoo.yml --private-key /tmp/${var.keypair}.pem",
       "ansible-playbook /opt/ansible-files/kafka.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/schema-registry.yml --private-key /tmp/${var.keypair}.pem",
+#      "ansible-playbook /opt/ansible-files/schema-registry.yml --private-key /tmp/${var.keypair}.pem",
 #      "ansible-playbook /opt/ansible-files/mm.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/cruisecontrol.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/connect.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/provectus.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/prometheus.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/grafana.yml --private-key /tmp/${var.keypair}.pem",
+#      "ansible-playbook /opt/ansible-files/cruisecontrol.yml --private-key /tmp/${var.keypair}.pem",
+#      "ansible-playbook /opt/ansible-files/connect.yml --private-key /tmp/${var.keypair}.pem",
+#      "ansible-playbook /opt/ansible-files/provectus.yml --private-key /tmp/${var.keypair}.pem",
+#      "ansible-playbook /opt/ansible-files/prometheus.yml --private-key /tmp/${var.keypair}.pem",
+#      "ansible-playbook /opt/ansible-files/grafana.yml --private-key /tmp/${var.keypair}.pem",
       "ansible-playbook /opt/ansible-files/service-start.yml --private-key /tmp/${var.keypair}.pem"
     ]
   }

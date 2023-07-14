@@ -42,7 +42,7 @@ mm_configuration = {
 }
 
 connect_configuration = {
-    "connect_count" = 1,
+    "connect_count" = 0,
     "instance_type" = "t2.medium",
     "ephemeral" = 30,
     "persistent" = 50,
@@ -53,7 +53,7 @@ connect_configuration = {
 }
 
 schema_configuration = {
-    "schema_count" = 1,
+    "schema_count" = 0,
     "instance_type" = "t2.medium",
     "ephemeral" = 30,
     "persistent" = 50,
@@ -63,7 +63,7 @@ schema_configuration = {
 }
 
 cruise_configuration = {
-    "cruise_deploy" = "true",
+    "cruise_deploy" = "false",
     "instance_type" = "t2.medium",
     "ephemeral" = 30,
     "persistent" = 30,
@@ -73,7 +73,7 @@ cruise_configuration = {
 }
 
 provectus_ui_configuration = {
-    "provectus_deploy" = "true",
+    "provectus_deploy" = "false",
     "instance_type" = "t2.medium",
     "ephemeral" = 30,
     "persistent" = 30,
@@ -85,7 +85,7 @@ provectus_ui_configuration = {
 # For prometheus enter count 0 or 1
 
 prometheus_configuration = {
-    "prom_count" = 1,
+    "prom_count" = 0,
     "instance_type" = "t2.large",
     "disk" = 40,
     "subnet" = "public",
@@ -95,16 +95,6 @@ prometheus_configuration = {
 grafana_configuration = {
     "instance_type" = "t2.medium",
     "disk" = 25,
-    "subnet" = "public",
-    "sg" = "kafkaSG"
-}
-
-# FOR CDC
-
-mysqldb_configuration = {
-    "mysqldb_deploy" = "false",
-    "instance_type" = "t2.medium",
-    "disk" = 30,
     "subnet" = "public",
     "sg" = "kafkaSG"
 }

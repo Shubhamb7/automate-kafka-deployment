@@ -58,10 +58,6 @@ variable "grafana_configuration" {
   type = map(any)
 }
 
-variable "mysqldb_configuration" {
-  type = map(any)
-}
-
 variable "keypair" {
   type = string
 }
