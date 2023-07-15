@@ -1,0 +1,12 @@
+---
+- name: systemd reload
+  become: true
+  systemd:
+    daemon_reload: yes
+    
+- name: enable mirrormaker service
+  become: true
+  systemd:
+    name: mm.service
+    enabled: true
+    masked: no

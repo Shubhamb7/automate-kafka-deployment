@@ -1,0 +1,3 @@
+---
+data_dir: /opt/zookeeperdata/
+host_num: "{{ groups['zoo'] | length | int}}"

@@ -1,0 +1,50 @@
+---
+- name: Create provectus directory
+  become: true
+  file:
+    path: "/opt/provectus"
+    state: directory
+    mode: '0755'
+- name: format the volume to xfs filesystem
+  become: true
+  shell: mkfs.xfs /dev/xvdf
+- name: mount the volume to data directory
+  become: true
+  shell: mount /dev/xvdf /opt/provectus/
+- name: Add entry to fstab
+  become: true
+  shell: echo "/dev/xvdf       /opt/provectus  xfs     defaults        0       0" >> /etc/fstab
+- name: check fstab
+  become: true
+  shell: mount -a
+- name: Download kafka ui jar
+  become: true
+  get_url:
+    url: https://github.com/provectus/kafka-ui/releases/download/v0.6.0/kafka-ui-api-v0.6.0.jar
+    dest: /opt/provectus/kafka-ui-api-v0.6.0.jar
+    mode: 0440
+- name: Generate provectus app yml file from template
+  become: true
+  template:
+    src: ../templates/provectus-app.yml.j2
+    dest: /opt/provectus/provectus-app.yml
+- name: Upload local provectus service file to the servers
+  become: true
+  copy:
+    src: ../files/provectus.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+  - systemd reload
+  - enable provectus service
+  - start provectus service
+- name: Logrotate of provectus
+  become: true
+  copy:
+    src: ../files/provectus
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: 0644

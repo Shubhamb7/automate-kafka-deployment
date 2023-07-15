@@ -1,0 +1,16 @@
+---
+- name: Download Kafka
+  become: true
+  get_url:
+    url: https://archive.apache.org/dist/kafka/3.3.1/kafka_2.13-3.3.1.tgz
+    dest: /tmp/kafka_2.13-3.3.1.tgz
+    mode: 0440
+- name: Extract kafka_2.13-3.3.1.tgz
+  become: true
+  unarchive:
+    src: /tmp/kafka_2.13-3.3.1.tgz
+    dest: /opt/
+    remote_src: yes
+- name: Rename kafka folder
+  become: true
+  command: "mv /opt/kafka_2.13-3.3.1 /opt/kafka"

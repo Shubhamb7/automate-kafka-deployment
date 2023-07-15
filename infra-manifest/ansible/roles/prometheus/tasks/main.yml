@@ -1,0 +1,39 @@
+---
+- name: Download prometheus tar
+  become: true
+  get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
+    dest: /tmp/prometheus-2.43.0.linux-amd64.tar.gz
+    mode: 0440
+- name: Extract prometheus-2.43.0.linux-amd64.tar.gz
+  become: true
+  unarchive:
+    src: /tmp/prometheus-2.43.0.linux-amd64.tar.gz
+    dest: /opt/
+    remote_src: yes
+- name: Rename prometheus folder
+  become: true
+  command: "mv /opt/prometheus-2.43.0.linux-amd64 /opt/prometheus"
+- name: Create syslog directory
+  become: true
+  file:
+    path: /opt/prometheus/systemlogs
+    state: directory
+    mode: '0755'
+- name: Generate prometheus config yml file from template
+  become: true
+  template:
+    src: ../templates/prometheus-config.yml.j2
+    dest: /opt/prometheus/prometheus-config.yml
+- name: Upload local prometheus service file to the servers
+  become: true
+  copy:
+    src: ../files/prometheus.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - systemd reload
+    - enable prometheus service
+    - start prometheus service

@@ -22,7 +22,7 @@ kafka_configuration = {
 }
 
 zoo_configuration = {
-    "zoo_count" = 1,
+    "zoo_count" = 3,
     "instance_type" = "t2.medium",
     "ephemeral" = 30,
     "persistent" = 60,
@@ -63,7 +63,7 @@ schema_configuration = {
 }
 
 cruise_configuration = {
-    "cruise_deploy" = "false",
+    "cruise_deploy" = "true",
     "instance_type" = "t2.medium",
     "ephemeral" = 30,
     "persistent" = 30,
@@ -85,7 +85,7 @@ provectus_ui_configuration = {
 # For prometheus enter count 0 or 1
 
 prometheus_configuration = {
-    "prom_count" = 0,
+    "prom_count" = 1,
     "instance_type" = "t2.large",
     "disk" = 40,
     "subnet" = "public",

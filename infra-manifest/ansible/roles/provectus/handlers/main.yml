@@ -1,0 +1,19 @@
+---
+- name: systemd reload
+  become: true
+  systemd:
+    daemon_reload: yes
+    
+- name: enable provectus service
+  become: true
+  systemd:
+    name: provectus.service
+    enabled: true
+    masked: no
+
+- name: start provectus service
+  become: true
+  systemd:
+    name: provectus.service
+    state: started
+    enabled: true

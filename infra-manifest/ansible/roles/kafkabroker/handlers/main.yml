@@ -1,0 +1,35 @@
+---
+- name: systemd reload
+  become: true
+  systemd:
+    daemon_reload: yes
+
+- name: enable kafka service
+  become: true
+  systemd:
+    name: kafka.service
+    enabled: true
+    masked: no
+
+- name: start kafka service
+  become: true
+  throttle: 1
+  systemd:
+    name: kafka.service
+    state: started
+    enabled: true
+
+- name: enable kafka exporter service
+  become: true
+  systemd:
+    name: kafka_exporter.service
+    enabled: true
+    masked: no
+
+- name: start kafka exporter service
+  become: true
+  throttle: 1
+  systemd:
+    name: kafka_exporter.service
+    state: started
+    enabled: true

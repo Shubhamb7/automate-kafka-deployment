@@ -1,0 +1,67 @@
+---
+- name: Setup zookeeper cluster
+  hosts: zoo
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - kafkapackages
+    - zookeeper
+
+- name: Setup kafka cluster
+  hosts: kafka
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - kafkapackages
+    - kafkabroker
+
+- name: Setup mirror maker
+  hosts: mm
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - kafkapackages
+    - mirrormaker
+
+- name: Setup kafka connect
+  hosts: connect
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - kafkapackages
+    - kafkaconnect
+
+- name: Setup schema registry
+  hosts: schemareg
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - schemaregistry
+
+- name: Setup cruise control
+  hosts: cruise
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - cruisecontrol
+
+- name: Setup provectus
+  hosts: provectus
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - provectus
+
+- name: Setup prometheus
+  hosts: prometheus
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - prometheus
+
+- name: Setup grafana
+  hosts: grafana
+  remote_user: ubuntu
+  roles:
+    - allpackages
+    - grafana

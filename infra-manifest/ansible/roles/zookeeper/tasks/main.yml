@@ -1,0 +1,79 @@
+---
+- name: vars
+  set_fact:
+    "zookeeper{{ item + 1  }}_ip": "{{ hostvars[groups['zoo'][item]]['inventory_hostname'] }}"
+  loop: "{{ range(0,host_num | int) | list }}"
+- name: Create data directory
+  become: true
+  file:
+    path: "{{ data_dir }}"
+    state: directory
+    mode: '0755'
+- name: format the volume to xfs filesystem
+  become: true
+  shell: mkfs.xfs /dev/xvdf
+- name: mount the volume to data directory
+  become: true
+  shell: mount /dev/xvdf /opt/zookeeperdata/
+- name: Add entry to fstab
+  become: true
+  shell: echo "/dev/xvdf       /opt/zookeeperdata      xfs     defaults        0       0" >> /etc/fstab
+- name: check fstab
+  become: true
+  shell: mount -a
+- name: Create sys log directory
+  become: true
+  file:
+    path: "{{ data_dir }}/syslogs"
+    state: directory
+    mode: '0755'
+- name: Create sys log directory
+  become: true
+  file:
+    path: "{{ data_dir }}/log4jlogs"
+    state: directory
+    mode: '0755'
+- name: Remove existing zookeeper properties file
+  become: true
+  file:
+    path: /opt/kafka/config/zookeeper.properties
+    state: absent
+- name: Generate zookeeper.properties from template
+  become: true
+  template:
+    src: ../templates/zookeeper.properties.j2
+    dest: /opt/kafka/config/zookeeper.properties
+- name: Upload local JMX exporter zookeeper metrics yml file to servers
+  become: true
+  copy:
+    src: ../files/zookeeper-jmx.yaml
+    dest: /opt/monitoring/zookeeper.yaml
+    owner: root
+    group: root
+    mode: 0440
+- name: Write myid to myid file
+  become: true
+  shell: "echo {{ hostvars[inventory_hostname]['id'] }} > {{ data_dir }}myid"
+- name: Upload local zookeeper service file to the servers
+  become: true
+  copy:
+    src: ../files/zookeeper.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+  notify: 
+    - systemd reload
+    - enable zookeeper service
+    - start zookeeper service
+- name: Log Rotation
+  become: true
+  shell: (crontab -l ; echo '30 1 * * 0 find /opt/zookeeperdata/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+- name: Logrotate for zookeeper
+  become: true
+  copy:
+    src: ../files/zookeeper
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: 0644

@@ -1,0 +1,73 @@
+---
+- name: Install adduser
+  become: true
+  apt:
+    name: adduser
+    state: present
+    update_cache: yes
+- name: Install libfontconfig1
+  become: true
+  apt:
+    name: libfontconfig1
+    state: present
+    update_cache: yes
+- name: Upload local dashboard
+  become: true
+  copy:
+    src: ../files/grafana-zookeeper-jmx-10607.json
+    dest: /opt/monitoring/
+    owner: root
+    group: root
+    mode: 0644
+- name: Upload local dashboard
+  become: true
+  copy:
+    src: ../files/grafana-kafka-jmx-11962.json
+    dest: /opt/monitoring/
+    owner: root
+    group: root
+    mode: 0644
+- name: Download grafana .deb
+  become: true
+  get_url:
+    url: https://dl.grafana.com/enterprise/release/grafana-enterprise_9.4.7_amd64.deb
+    dest: /tmp/grafana-enterprise_9.4.7_amd64.deb
+    mode: 0440
+- name: Install grafana debian package
+  become: true
+  command: "dpkg -i /tmp/grafana-enterprise_9.4.7_amd64.deb"
+  notify:
+    - enable grafana service
+    - start grafana service
+- name: Pause for 10 sec to grafana get ready
+  pause:
+    seconds: 10
+- name: Set up Prometheus data source 
+  grafana_datasource:
+    name: "Prometheus"
+    ds_type: prometheus
+    ds_url: "http://{{ prometheus_url }}:9090"
+    access: proxy
+    is_default: true
+    state: present
+    grafana_url: http://{{ private_ip }}:3000
+    grafana_user: "{{ grafana_admin_user }}"
+    grafana_password: "{{ grafana_admin_password }}"
+- name: Import kafka jmx dashboard
+  become: true
+  grafana_dashboard:
+    state: present
+    path: "{{ kafka_jmx_dashboard_file_path }}"
+    overwrite: true
+    grafana_url: http://{{ private_ip }}:3000
+    grafana_user: "{{ grafana_admin_user }}"
+    grafana_password: "{{ grafana_admin_password }}"
+- name: Import zookeeper jmx dashboard
+  become: true
+  grafana_dashboard:
+    state: present
+    path: "{{ zookeeper_jmx_dashboard_file_path }}"
+    overwrite: true
+    grafana_url: http://{{ private_ip }}:3000
+    grafana_user: "{{ grafana_admin_user }}"
+    grafana_password: "{{ grafana_admin_password }}"

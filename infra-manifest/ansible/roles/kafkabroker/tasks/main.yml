@@ -1,0 +1,109 @@
+---
+- name: Create kafka data directory
+  become: true
+  file:
+    path: "/opt/kafkadata"
+    state: directory
+    mode: '0755'
+- name: format the volume to xfs filesystem
+  become: true
+  shell: mkfs.xfs /dev/xvdf
+- name: mount the volume to data directory
+  become: true
+  shell: mount /dev/xvdf /opt/kafkadata/
+- name: Add entry to fstab
+  become: true
+  shell: echo "/dev/xvdf       /opt/kafkadata  xfs     defaults        0       0" >> /etc/fstab
+- name: check fstab
+  become: true
+  shell: mount -a
+- name: Create sys log directory
+  become: true
+  file:
+    path: "/opt/kafkadata/syslogs"
+    state: directory
+    mode: '0755'
+- name: Create sys log directory
+  become: true
+  file:
+    path: "/opt/kafkadata/log4jlogs"
+    state: directory
+    mode: '0755'
+- name: Get public ip for advertiser
+  command: curl --silent --fail http://ifconfig.me/ip
+  register: public_ip
+- name: Remove existing kafka properties file
+  become: true
+  file:
+    path: /opt/kafka/config/server.properties
+    state: absent
+- name: Generate server.properties from template
+  become: true
+  template:
+    src: ../templates/server.properties.j2
+    dest: /opt/kafka/config/server.properties
+- name: Upload cruise control metrics exporter to the servers
+  become: true
+  copy:
+    src: ../files/cruise-control-metrics-reporter-2.5.117-SNAPSHOT.jar
+    dest: /opt/kafka/libs/
+    owner: root
+    group: root
+    mode: 0644
+- name: Upload JMX exporter kafka metrics yml file
+  become: true
+  copy:
+    src: ../files/kafka-jmx.yml
+    dest: /opt/monitoring/
+    owner: root
+    group: root
+    mode: 0644
+- name: Upload local kafka service file to the servers
+  become: true
+  copy:
+    src: ../files/kafka.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+  notify: 
+    - systemd reload
+    - enable kafka service
+    - start kafka service
+
+- name: Download Kafka exporter
+  become: true
+  get_url:
+    url: https://github.com/danielqsj/kafka_exporter/releases/download/v1.6.0/kafka_exporter-1.6.0.linux-amd64.tar.gz
+    dest: /tmp/kafka_exporter-1.6.0.linux-amd64.tar.gz
+    mode: 0440
+- name: Extract kafka_exporter-1.6.0.linux-amd64.tar.gz
+  become: true
+  unarchive:
+    src: /tmp/kafka_exporter-1.6.0.linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+- name: Move kafka exporter binary to other folder
+  become: true
+  command: "mv /tmp/kafka_exporter-1.6.0.linux-amd64/kafka_exporter /opt/monitoring/kafka_exporter"
+- name: Generate kafka_exporter.service from template
+  become: true
+  template:
+    src: ../templates/kafka_exporter.service.j2
+    dest: /etc/systemd/system/kafka_exporter.service
+  notify: 
+    - systemd reload
+    - enable kafka exporter service
+    - start kafka exporter service
+
+- name: Log Rotation
+  become: true
+  shell: (crontab -l ; echo '30 1 * * 0 find /opt/kafkadata/log4jlogs/ -name "*.log.*" ! -name "*.log" -type f -mtime +7 -exec rm {} \;') | crontab -
+- name: Logrotate for kafka
+  become: true
+  copy:
+    src: ../files/kafka
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: 0644

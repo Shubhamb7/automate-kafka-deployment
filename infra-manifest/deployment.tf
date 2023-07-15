@@ -30,20 +30,12 @@ resource "aws_instance" "ansible" {
       "sudo apt-get install ansible -y",
       "sudo mv ${var.keypair}.pem /tmp/${var.keypair}.pem",
       "sudo chmod 400 /tmp/${var.keypair}.pem",
-      "sudo rm /etc/ansible/ansible.cfg && sudo mv ansible.cfg /etc/ansible/ansible.cfg",
-      "sudo rm /etc/ansible/hosts && sudo mv hosts /etc/ansible/hosts",
-      "sudo mkdir /opt/ansible-files && sudo mv * /opt/ansible-files/",
-      "ansible-playbook /opt/ansible-files/packages.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/zoo.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/kafka.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/schema-registry.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/mm.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/cruisecontrol.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/connect.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/provectus.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/prometheus.yml --private-key /tmp/${var.keypair}.pem",
-#      "ansible-playbook /opt/ansible-files/grafana.yml --private-key /tmp/${var.keypair}.pem",
-      "ansible-playbook /opt/ansible-files/service-start.yml --private-key /tmp/${var.keypair}.pem"
+      "sudo rm /etc/ansible/ansible.cfg && sudo mv config/ansible.cfg /etc/ansible/ansible.cfg",
+      "sudo rm /etc/ansible/hosts && sudo mv config/hosts /etc/ansible/hosts",
+      "sudo rm -rf config/",
+      "sudo mkdir /opt/kafka-ansible && sudo mv * /opt/kafka-ansible/",
+      "cd /opt/kafka-ansible/ && sudo ln -s ../roles/ playbooks/",
+      "ansible-playbook /opt/kafka-ansible/playbooks/setup.yml --private-key /tmp/${var.keypair}.pem"
     ]
   }
 }

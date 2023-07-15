@@ -72,7 +72,7 @@ ${ip}
 %{ endif ~} 
  
   EOT
-  filename = "./ansible/hosts"
+  filename = "./ansible/config/hosts"
 }
 
 resource "local_file" "mm_properties" {
@@ -123,7 +123,7 @@ emit.heartbeats.enabled = true
 emit.heartbeats.interval.seconds = 5
 EOT
 
-  filename   = "./ansible/connect-mirror-maker.properties"
+  filename   = "./ansible/roles/mirrormaker/files/connect-mirror-maker.properties"
   depends_on = [aws_instance.ec2broker, aws_instance.ec2mm]
 }
  
@@ -145,7 +145,7 @@ resource "local_file" "capacityJBOD" {
     ]
   }
   EOT
-  filename   = "./ansible/capacityJBOD.json"
+  filename   = "./ansible/roles/cruisecontrol/files/capacityJBOD.json"
   depends_on = [aws_instance.ec2broker]
 }
 
@@ -167,6 +167,6 @@ resource "local_file" "capacityCores" {
     ]
   }
   EOT
-  filename   = "./ansible/capacityCores.json"
+  filename   = "./ansible/roles/cruisecontrol/files/capacityCores.json"
   depends_on = [aws_instance.ec2broker]
 }

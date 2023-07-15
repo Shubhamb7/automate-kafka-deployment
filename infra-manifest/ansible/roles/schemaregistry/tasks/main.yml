@@ -1,0 +1,54 @@
+---
+- name: Create schemareg directory
+  become: true
+  file:
+    path: "/opt/schemareg"
+    state: directory
+    mode: '0755'
+- name: format the volume to xfs filesystem
+  become: true
+  shell: mkfs.xfs /dev/xvdf
+- name: mount the volume to data directory
+  become: true
+  shell: mount /dev/xvdf /opt/schemareg/
+- name: Add entry to fstab
+  become: true
+  shell: echo "/dev/xvdf       /opt/schemareg  xfs     defaults        0       0" >> /etc/fstab
+- name: check fstab
+  become: true
+  shell: mount -a
+- name: Create sys log directory
+  become: true
+  file:
+    path: "/opt/schemareg/systemlogs"
+    state: directory
+    mode: '0755'
+- name: Download Apicurio
+  become: true
+  get_url:
+    url: https://github.com/Apicurio/apicurio-registry/releases/download/2.4.1.Final/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+    dest: /tmp/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+    mode: 0440
+- name: Extract apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+  become: true
+  unarchive:
+    src: /tmp/apicurio-registry-storage-kafkasql-2.4.1.Final-all.tar.gz
+    dest: /opt/schemareg/
+    remote_src: yes
+- name: Generate schema-registry.service from template
+  become: true
+  template:
+    src: ../templates/schema-registry.service.j2
+    dest: /etc/systemd/system/schema-registry.service
+  notify:
+    - systemd reload
+    - enable schema registry service
+    - start schema registry service
+- name: Logrotate of schemareg
+  become: true
+  copy:
+    src: ../files/schemareg
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: 0644

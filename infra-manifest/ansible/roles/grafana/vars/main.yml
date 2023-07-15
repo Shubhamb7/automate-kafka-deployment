@@ -1,0 +1,7 @@
+---
+grafana_admin_user: admin
+grafana_admin_password: admin
+private_ip: "{{ hostvars[ inventory_hostname ]['ansible_default_ipv4']['address'] }}"
+prometheus_url: "{{hostvars[groups['prometheus'][0]]['inventory_hostname']}}"
+kafka_jmx_dashboard_file_path: "/opt/monitoring/grafana-kafka-jmx-11962.json"
+zookeeper_jmx_dashboard_file_path: "/opt/monitoring/grafana-zookeeper-jmx-10607.json"

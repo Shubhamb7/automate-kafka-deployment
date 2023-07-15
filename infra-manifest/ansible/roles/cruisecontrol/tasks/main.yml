@@ -1,0 +1,115 @@
+---
+- name: Create cruise directory
+  become: true
+  file:
+    path: "/opt/cruise"
+    state: directory
+    mode: '0755'
+- name: format the volume to xfs filesystem
+  become: true
+  shell: mkfs.xfs /dev/xvdf
+- name: mount the volume to data directory
+  become: true
+  shell: mount /dev/xvdf /opt/cruise/
+- name: Add entry to fstab
+  become: true
+  shell: echo "/dev/xvdf       /opt/cruise     xfs     defaults        0       0" >> /etc/fstab
+- name: check fstab
+  become: true
+  shell: mount -a
+- name: Create sys log directory
+  become: true
+  file:
+    path: "/opt/cruise/syslogs/"
+    state: directory
+    mode: '0755'
+- name: Get public ip of Cruise Control server
+  command: curl --silent --fail http://ifconfig.me/ip
+  register: cruise_public_ip
+- name: Clone Cruise Control Branch 2.5.116
+  become: true
+  git:
+    repo: https://github.com/linkedin/cruise-control.git
+    dest: /opt/cruise/cruise-control
+    single_branch: yes
+    version: 2.5.118
+- name: Download Cruise Control UI v0.4.0
+  become: true
+  get_url:
+    url: https://github.com/linkedin/cruise-control-ui/releases/download/v0.4.0/cruise-control-ui-0.4.0.tar.gz
+    dest: /tmp/cruise-control-control-ui-0.4.0.tar.gz
+    mode: 0440
+- name: Extract cruise-control-ui-0.4.0.tar.gz
+  become: true
+  unarchive:
+    src: /tmp/cruise-control-control-ui-0.4.0.tar.gz
+    dest: /opt/cruise/cruise-control/
+    remote_src: yes
+- name: Remove existing cruisecontrol properties file
+  become: true
+  file:
+    path: /opt/cruise/cruise-control/config/cruisecontrol.properties
+    state: absent
+- name: Remove existing cruisecontrol capacityCores file
+  become: true
+  file:
+    path: /opt/cruise/cruise-control/config/capacityCores.json
+    state: absent
+- name: Remove existing cruisecontrol capacityJBOD file
+  become: true
+  file:
+    path: /opt/cruise/cruise-control/config/capacityJBOD.json
+    state: absent
+- name: Upload local cruisecontrol capacityCores file to the server
+  become: true
+  copy:
+    src: ../files/capacityCores.json
+    dest: /opt/cruise/cruise-control/config/
+    owner: root
+    group: root
+    mode: 0644
+- name: Upload local cruisecontrol capacityJBOD file to the server
+  become: true
+  copy:
+    src: ../files/capacityJBOD.json
+    dest: /opt/cruise/cruise-control/config/
+    owner: root
+    group: root
+    mode: 0644
+- name: Generate cruisecontrol properties from template
+  become: true
+  template:
+    src: ../templates/cruisecontrol.properties.j2
+    dest: /opt/cruise/cruise-control/config/cruisecontrol.properties
+- name: Generate config.csv for cruise control ui from template
+  become: true
+  template:
+    src: ../templates/config.csv.j2
+    dest: /opt/cruise/cruise-control/cruise-control-ui/dist/static/config.csv
+- name: Run gradlew and build jar
+  become: true
+  shell: ./gradlew jar copyDependantLibs
+  args:
+    chdir: /opt/cruise/cruise-control/
+  register: gradle_output
+  no_log: true
+- name: Upload local cruise control service file to the servers
+  become: true
+  copy:
+    src: ../files/cruise.service
+    dest: /etc/systemd/system/
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - systemd reload
+    - enable cruise control service
+    - start cruise control service
+- name: Logrotate of cruise
+  become: true
+  copy:
+    src: ../files/cruise
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: 0644

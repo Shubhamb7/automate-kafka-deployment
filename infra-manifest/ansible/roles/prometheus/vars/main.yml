@@ -1,0 +1,6 @@
+---
+kafka_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+zoo_ips: "{{ groups['zoo'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+connect_ips: "{{ groups['connect'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+mm_ips: "{{ groups['mm'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:7071') | join(',') }}"
+kafka_exporter_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:9308') | join(',') }}"
