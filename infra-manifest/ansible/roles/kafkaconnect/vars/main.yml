@@ -1,4 +1,4 @@
 ---
 kafka_ips: "{{ groups['kafka'] | default([]) | map('extract', hostvars, ['inventory_hostname']) | map('regex_replace', '^(.*)$', '\\1:9092') | join(',') }}"
-bucket_region: ""
-bucket_name: ""
+bucket_region: "{{ lookup('file', '../files/bucket.json') | from_json | json_query('bucket_region') }}"
+bucket_name: "{{ lookup('file', '../files/bucket.json') | from_json | json_query('bucket_name') }}"

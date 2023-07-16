@@ -1,6 +1,6 @@
 resource "aws_instance" "ansible" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t2.small"
+  instance_type          = "t2.medium"
   subnet_id              = aws_subnet.public_subnet[0].id
   vpc_security_group_ids = [aws_security_group.sg.id]
   key_name               = var.keypair
@@ -34,8 +34,7 @@ resource "aws_instance" "ansible" {
       "sudo rm /etc/ansible/hosts && sudo mv config/hosts /etc/ansible/hosts",
       "sudo rm -rf config/",
       "sudo mkdir /opt/kafka-ansible && sudo mv * /opt/kafka-ansible/",
-      "cd /opt/kafka-ansible/ && sudo ln -s ../roles/ playbooks/",
-      "ansible-playbook /opt/kafka-ansible/playbooks/setup.yml --private-key /tmp/${var.keypair}.pem"
+      "ansible-playbook /opt/kafka-ansible/setup.yml --private-key /tmp/${var.keypair}.pem"
     ]
   }
 }

@@ -1,4 +1,8 @@
 ---
+- name: Store group names in a variable
+  set_fact:
+    all_group_names: "{{ groups.keys() | list }}"
+    
 - name: Create provectus directory
   become: true
   file:

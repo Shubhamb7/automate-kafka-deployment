@@ -170,3 +170,14 @@ resource "local_file" "capacityCores" {
   filename   = "./ansible/roles/cruisecontrol/files/capacityCores.json"
   depends_on = [aws_instance.ec2broker]
 }
+
+resource "local_file" "bucket_config" {
+  content = <<EOT
+  {
+  "bucket_region":"${var.aws_region}",
+  "bucket_name":"${var.connect_configuration["s3bucket_name"]}"
+  }
+  EOT
+  filename   = "./ansible/roles/kafkaconnect/files/bucket.json"
+  depends_on = [aws_instance.ec2broker]
+}

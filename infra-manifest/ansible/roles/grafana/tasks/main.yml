@@ -36,9 +36,18 @@
 - name: Install grafana debian package
   become: true
   command: "dpkg -i /tmp/grafana-enterprise_9.4.7_amd64.deb"
-  notify:
-    - enable grafana service
-    - start grafana service
+- name: enable grafana service
+  become: true
+  systemd:
+    name: grafana-server.service
+    enabled: true
+    masked: no
+- name: start grafana service
+  become: true
+  systemd:
+    name: grafana-server.service
+    state: started
+    enabled: true
 - name: Pause for 10 sec to grafana get ready
   pause:
     seconds: 10

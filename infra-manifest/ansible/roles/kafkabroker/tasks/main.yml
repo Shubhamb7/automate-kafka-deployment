@@ -1,4 +1,8 @@
 ---
+- name: Store group names in a variable
+  set_fact:
+    all_group_names: "{{ groups.keys() | list }}"
+
 - name: Create kafka data directory
   become: true
   file:
@@ -50,6 +54,7 @@
     owner: root
     group: root
     mode: 0644
+  when: "'cruise' in all_group_names"
 - name: Upload JMX exporter kafka metrics yml file
   become: true
   copy:
